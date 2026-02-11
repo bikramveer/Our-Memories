@@ -213,13 +213,12 @@ a {
   }
   
   .modal-container {
-    width: 100%;
-    max-width: 1400px;
-    height: 90vh;
-    background: transparent;
+    display: flex;
+    align-items: stretch;
+    max-width: 90vw;
+    max-height: 90vh;
     border-radius: 1rem;
     overflow: hidden;
-    position: relative;
     animation: slideUp 0.3s ease-out;
   }
   
