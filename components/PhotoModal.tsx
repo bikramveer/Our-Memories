@@ -113,7 +113,21 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
 
   return (
     <div className='modal-overlay' onClick={onClose}>
-      <div className='modal-container' onClick={(e) => e.stopPropagation()}>
+      <div onClick={(e) => e.stopPropagation()}
+        className='
+          flex
+          flex-col
+          md: flex-row
+          items-stretch
+          rounded-xl
+          overflow-hidden
+          shadow-2xl
+          w-full
+          md:w-auto
+          md:max-w-[90vw]
+          max-h-[90vh]
+          '
+      >
 
         <div className='
           relative
@@ -121,6 +135,9 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
           items-center
           justify-center
           bg-transparent
+          overflow-hidden
+          md:max-w-[65vw]
+          flex-shrink-0
           '
         >
           <img
@@ -128,8 +145,12 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
             alt={photo.file_name}
             className='
               block
-              max-h-[90vh]
-              max-w-[65vw]
+              w-full
+              md:w-auto
+              md:h-auto
+              md:max-h-[90vh]
+              md:max-w-[65vw]
+              max-h-[50vh]
               object-contain
               rounded-l-xl
               '
@@ -137,12 +158,14 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
         </div>
 
         <div className='
-          w-[380px]
-          flex-shrink-0
+          w-full
+          md:w-[380px]
+          md:flex-shrink-0
           bg-white
           flex
           flex-col
-          rounded-r-xl
+          md:max-h-[90vh]
+          max-h-[45vh]
           '
         >
           <div className='
@@ -152,6 +175,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
             flex
             items-center
             justify-between
+            flex-shrink-0
             '
           >
             <div className='flex items-center gap-3'>
@@ -239,13 +263,14 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
             </div>
           </div>
 
-
-          <CommentSection
-            photoId={photo.id}
-            comments={comments}
-            loading={loadingComments}
-            onCommentAdded={fetchComments}
-          />
+          <div className='flex-1 overflow-y-auto min-h-0'>
+            <CommentSection
+              photoId={photo.id}
+              comments={comments}
+              loading={loadingComments}
+              onCommentAdded={fetchComments}
+            />
+          </div>
         </div>
       </div>
     </div>
