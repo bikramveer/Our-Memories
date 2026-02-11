@@ -216,7 +216,7 @@ a {
     width: 100%;
     max-width: 1400px;
     height: 90vh;
-    background: white;
+    background: transparent;
     border-radius: 1rem;
     overflow: hidden;
     position: relative;
