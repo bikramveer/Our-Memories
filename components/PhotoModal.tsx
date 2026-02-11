@@ -128,7 +128,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
         <div className="modal-content">
           {/* Left side - Photo */}
           <div className="modal-photo-section">
-            <div className="relative w-full h-full flex items-center justify-center">
+            <div className="relative bg-black w-full h-full flex items-center justify-center">
               <Image
                 src={getPhotoUrl(photo.storage_path)}
                 alt={photo.file_name}
