@@ -154,7 +154,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
             justify-between
             '
           >
-            <div className='flex- items-center gap-3'>
+            <div className='flex items-center gap-3'>
               <div className='
                 w-10
                 h-10
@@ -203,7 +203,6 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
                     border-red-500
                     rounded-lg
                     transition-colors
-                    md:mr-12
                     '
                   title='Delete photo'
                 >
