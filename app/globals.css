@@ -203,7 +203,7 @@ a {
    .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.8);
     z-index: 50;
     display: flex;
     align-items: center;
@@ -253,7 +253,7 @@ a {
   .modal-photo-section {
     flex: 1;
     min-width: 0;
-    background: black;
+    background: transparent;
   }
   
   .modal-sidebar {
