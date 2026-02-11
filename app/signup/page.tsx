@@ -107,7 +107,7 @@ export default function SignUpPage() {
           {/* Email Input */}
           <div className="relative">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-              <span className="sparkle text-purple-500">✨</span>
+              {/* <span className="sparkle text-purple-500">✨</span> */}
               Email
             </label>
             <input

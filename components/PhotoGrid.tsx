@@ -103,11 +103,11 @@ export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps
     return (
         <>
             <div>
-                <div className="mb-6">
+                {/* <div className="mb-6">
                     <p className="text-gray-600">
                         {photos.length} {photos.length === 1 ? 'memory' : 'memories'} shared
                     </p>
-                </div>
+                </div> */}
 
                 <div className="
                     grid

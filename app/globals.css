@@ -203,7 +203,7 @@ a {
    .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.8);
     z-index: 50;
     display: flex;
     align-items: center;
@@ -213,18 +213,16 @@ a {
   }
   
   .modal-container {
-    width: 100%;
-    max-width: 1400px;
-    height: 90vh;
-    background: white;
+    display: flex;
+    align-items: stretch;
+    max-width: 90vw;
+    max-height: 90vh;
     border-radius: 1rem;
     overflow: hidden;
-    position: relative;
     animation: slideUp 0.3s ease-out;
   }
   
   .modal-close-btn {
-    position: absolute;
     top: 1rem;
     right: 1rem;
     z-index: 10;
@@ -253,7 +251,7 @@ a {
   .modal-photo-section {
     flex: 1;
     min-width: 0;
-    background: black;
+    background: transparent;
   }
   
   .modal-sidebar {
