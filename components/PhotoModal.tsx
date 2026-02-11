@@ -24,10 +24,6 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
   useEffect(() => {
     if (isOpen && photo) {
       fetchComments()
-      // Debug: Check user IDs
-      console.log('Current user ID:', user?.id)
-      console.log('Photo user ID:', photo.user_id)
-      console.log('Can delete?', user && user.id === photo.user_id)
     }
   }, [isOpen, photo])
 
@@ -115,90 +111,160 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
   if (!isOpen) return null
 
   return (
-    // Overlay - clicking anywhere here closes the modal
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-      onClick={onClose}
-    >
-      {/* Inner wrapper - stops clicks bubbling to overlay */}
-      <div
-        className="flex flex-col md:flex-row items-stretch rounded-xl overflow-hidden shadow-2xl w-full md:w-auto md:max-w-[90vw] max-h-[90vh]"
-        onClick={(e) => e.stopPropagation()}
+    <div className='modal-overlay' onClick={onClose}>
+      {/* Iner wrapper */}
+      <div onClick={(e) => e.stopPropagation()}
+        className='
+          flex
+          flex-col
+          md:flex-row
+          items-stretch
+          rounded-xl
+          overflow-hidden
+          shadow-2xl
+          w-full
+          md:w-auto
+          md:max-w-[90vw]
+          max-h-[90vh]
+          '
       >
-        {/* Photo - constrained to viewport */}
-        <div className="flex items-center justify-center bg-transparent overflow-hidden md:max-w-[65vw] flex-shrink-0">
+        {/* Photo */}
+        <div className='
+          relative
+          flex
+          items-center
+          justify-center
+          bg-transparent
+          overflow-hidden
+          md:max-w-[65vw]
+          flex-shrink-0
+          '
+        >
           <img
             src={getPhotoUrl(photo.storage_path)}
             alt={photo.file_name}
-            className="block w-full md:w-auto md:h-auto md:max-h-[90vh] md:max-w-[65vw] max-h-[50vh] object-contain"
-          />
+            className='
+              block
+              w-full
+              md:w-auto
+              md:h-auto
+              md:max-h-[90vh]
+              md:max-w-[65vw]
+              max-h-[50vh]
+              object-contain
+              rounded-l-xl
+              '
+            />
         </div>
 
-        {/* Sidebar - full width on mobile, fixed width on desktop */}
-        <div className="w-full md:w-[380px] md:flex-shrink-0 bg-white flex flex-col md:max-h-[90vh] max-h-[45vh]">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-semibold">
+        {/* Sidebar */}
+        <div className='
+          w-full
+          md:w-[380px]
+          md:flex-shrink-0
+          bg-white
+          flex
+          flex-col
+          md:max-h-[90vh]
+          max-h-[45vh]
+          '
+        >
+          <div className='
+            p-4
+            border-b
+            border-gray-200
+            flex
+            items-center
+            justify-between
+            flex-shrink-0
+            '
+          >
+            <div className='flex items-center gap-3'>
+              <div className='
+                w-10
+                h-10
+                rounded-full
+                bg-gradient-to-br
+                from-pink-500
+                to-purple-500
+                flex
+                items-center
+                justify-center
+                text-white
+                font-semibold
+                '
+              >
                 {photo.profile?.name?.[0]?.toUpperCase() || '?'}
               </div>
               <div>
-                <p className="font-semibold text-gray-800">
+                <p className='font-semibold text-gray-800'>
                   {photo.profile?.name || 'Unknown'}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className='text-xs text-gray-500'>
                   {new Date(photo.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
-                    year: 'numeric'
+                    year: 'numeric',
                   })}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Delete button (only for photo owner) */}
+            <div className='flex items-center gap-2'>
               {user && user.id === photo.user_id && (
                 <button
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="flex items-center gap-2 px-3 py-2 text-red-500 hover:text-white hover:bg-red-500 border border-red-500 rounded-lg transition-colors md:mr-12"
-                  title="Delete photo"
+                  className='
+                    flex
+                    items-center
+                    gap-2
+                    px-3
+                    py-2
+                    text-red-500
+                    hover:text-white
+                    hover:bg-red-500
+                    border
+                    border-red-500
+                    rounded-lg
+                    transition-colors
+                    '
+                  title='Delete photo'
                 >
                   {deleting ? (
                     <>
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <svg className='animate-spin h-4 w-4' viewBox='0 0 24 24'>
+                        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' fill='none' />
+                        <path className='opacity-75' fill='currentColor'
+                          d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
                       </svg>
-                      <span className="text-sm">Deleting...</span>
+                      <span className='text-sm'>Deleting...</span>
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
+                          d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' />
                       </svg>
-                      <span className="text-sm font-medium">Delete</span>
+                      <span className='text-sm font-medium'>Delete</span>
                     </>
                   )}
                 </button>
               )}
 
-              {/* Close button */}
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="modal-close-btn"
                 aria-label="Close modal"
               >
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
           </div>
 
-          {/* Comments - scrollable */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className='flex-1 overflow-y-auto min-h-0'>
             <CommentSection
               photoId={photo.id}
               comments={comments}
