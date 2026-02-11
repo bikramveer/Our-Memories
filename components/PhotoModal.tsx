@@ -149,7 +149,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
               md:w-auto
               md:h-auto
               md:max-h-[90vh]
-              md:max-w-[65vw]
+              md:max-w-[40vw]
               max-h-[50vh]
               object-contain
               rounded-l-xl
