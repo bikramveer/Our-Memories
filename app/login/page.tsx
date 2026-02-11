@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
+import { Eye, EyeOff } from "lucide-react";
+
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
+
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -182,15 +186,38 @@ export default function LoginPage() {
                         >
                             Password
                         </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="********"
-                            required
-                            className="auth-input"
-                        />
+                        <div className="relative">
+                            <input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="********"
+                                required
+                                className="auth-input"
+                            />
+                            <button
+                              type='button'
+                              className='
+                                absolute
+                                -translate-y-2/4
+                                cursor-pointer
+                                text-gray-400
+                                p-1.5
+                                rounded-[10px]
+                                border-[none]
+                                right-2.5
+                                top-2/4
+                                hover:text-gray-500
+                                background-transparent
+                                hover:background-#f3f4f6  
+                              '
+                              onClick={() => setShowPassword((v) => !v)}
+                              aria-label='Toggle password visibility'
+                            >
+                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
 
                     <button
