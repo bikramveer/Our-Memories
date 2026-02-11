@@ -126,37 +126,39 @@ export default function SignUpPage() {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
-              className="auth-input"
-            />
-            <button
-              type='button'
-              className='
-                absolute
-                -translate-y-2/4
-                cursor-pointer
-                text-gray-400
-                p-1.5
-                rounded-[10px]
-                border-[none]
-                right-2.5
-                top-2/4
-                hover:text-gray-500
-                background-transparent
-                hover:background-#f3f4f6  
-              '
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label='Toggle password visibility'
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+            <div>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={6}
+                className="auth-input"
+              />
+              <button
+                type='button'
+                className='
+                  absolute
+                  -translate-y-2/4
+                  cursor-pointer
+                  text-gray-400
+                  p-1.5
+                  rounded-[10px]
+                  border-[none]
+                  right-2.5
+                  top-2/4
+                  hover:text-gray-500
+                  background-transparent
+                  hover:background-#f3f4f6  
+                '
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label='Toggle password visibility'
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
           </div>
 
