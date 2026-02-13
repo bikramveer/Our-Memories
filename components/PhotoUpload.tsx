@@ -6,10 +6,11 @@ import { uploadPhoto, validateImageFile, getPhotoMetadata } from '@/lib/storage'
 import { supabase } from '@/lib/supabase';
 
 interface PhotoUploadProps {
-    onUploadComplete: () => void,
+    onUploadComplete: () => void
+    currentFolderId: string | null
 }
 
-export default function PhotoUpload({ onUploadComplete }: PhotoUploadProps) {
+export default function PhotoUpload({ onUploadComplete, currentFolderId }: PhotoUploadProps) {
     const { user } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -38,14 +39,17 @@ export default function PhotoUpload({ onUploadComplete }: PhotoUploadProps) {
                     .insert({
                         user_id: user.id,
                         storage_path: storagePath,
+                        folder_id: currentFolderId,
                         ...metadata,
                     })
                 
                 if (dbError) throw dbError;
             }
 
+            // Refresh photo grid
             onUploadComplete();
 
+            // Refresh input
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }

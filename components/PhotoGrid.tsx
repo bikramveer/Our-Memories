@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from "react";
-import { PhotoWithUser } from "@/types/database";
+import { PhotoWithUser, FolderWithCount } from "@/types/database";
 import { getPhotoUrl } from "@/lib/storage";
 import Image from "next/image";
 import PhotoModal from "./PhotoModal";
 
 interface PhotoGridProps {
     photos: PhotoWithUser[],
+    folders: FolderWithCount[],
     loading: boolean,
     onRefresh: () => void,
+    emptyMessage?: string
 };
 
-export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps) {
+export default function PhotoGrid({ photos, folders, loading, onRefresh, emptyMessage }: PhotoGridProps) {
     const [selectedPhoto, setSelectedPhoto] = useState<PhotoWithUser | null>(null)
 
     if (loading) {
@@ -85,7 +87,7 @@ export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps
                     </div>
 
                     <h2 className="text-2xl font-bold text-gray-800 mb-2 flex justify-center align-center">
-                        No photos yet!
+                        {emptyMessage || 'No photos yet!'}
                     </h2>
 
                     <p className="text-gray-600 mb-6 flex justify-center align-center">
@@ -93,7 +95,7 @@ export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps
                     </p>
 
                     <p className="text-sm text-gray-500 flex justify-center align-center">
-                        Click the{' '}<span className="text-pink-500 font-semibold">Upload</span>button above to add photos!
+                        Click the <span className="text-pink-500 font-semibold">Upload</span> button above to add photos!
                     </p>
                 </div>
             </div>
@@ -108,7 +110,7 @@ export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps
                         {photos.length} {photos.length === 1 ? 'memory' : 'memories'} shared
                     </p>
                 </div> */}
-
+                {/* Photo Grid */}
                 <div className="
                     grid
                     grid-cols-1
@@ -124,6 +126,7 @@ export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps
                             className="photo-card group cursor-pointer"
                             onClick={() => setSelectedPhoto(photo)}
                         >
+                            {/* Photo */}
                             <div className="
                                 aspect-square
                                 relative
@@ -151,6 +154,7 @@ export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps
                                 />
                             </div>
 
+                            {/* Photo Info Overlay */}
                             <div className="
                                 absolute
                                 inset-0
@@ -182,12 +186,18 @@ export default function PhotoGrid({ photos, loading, onRefresh }: PhotoGridProps
                 </div>
             </div>
 
+            {/* Photo Modal */}
             {selectedPhoto && (
                 <PhotoModal
                     photo={selectedPhoto}
+                    folders={folders}
                     isOpen={!!selectedPhoto}
                     onClose={() => setSelectedPhoto(null)}
                     onPhotoDeleted={() => {
+                        setSelectedPhoto(null)
+                        onRefresh()
+                    }}
+                    onPhotoMoved={() => {
                         setSelectedPhoto(null)
                         onRefresh()
                     }}
