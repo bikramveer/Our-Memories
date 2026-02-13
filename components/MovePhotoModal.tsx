@@ -5,7 +5,7 @@ import { FolderWithCount, PhotoWithUser } from "@/types/database"
 import { supabase } from "@/lib/supabase"
 
 interface MovePhotoModalProps {
-    photo: PhotoWithUser
+    photos: PhotoWithUser[]
     folders: FolderWithCount[]
     currentFolderId: string | null
     isOpen: boolean
@@ -14,7 +14,7 @@ interface MovePhotoModalProps {
 }
 
 export default function MovePhotoModal({
-    photo,
+    photos,
     folders,
     currentFolderId,
     isOpen,
@@ -31,29 +31,29 @@ export default function MovePhotoModal({
 
         setMoving(true)
         try {
+            const ids = photos.map(p => p.id)
             const { data, error } = await supabase
                 .from('photos')
                 .update({ folder_id: targetFolderId })
-                .eq('id', photo.id)
+                .in('id', ids)
                 .select()
-            
-            if (error) throw error
 
-            if (!data || data.length === 0) {
-                throw new Error('Permission denied. You can only move your own photos.')
-            }
+            if (error) throw error
+            if (!data || data.length === 0) throw new Error('Permission denied - you can only move your own photos.')
 
             onMoved()
             onClose()
-        } catch (err) {
+        } catch (err: any) {
             console.error('Move error:', err)
-            alert('Failed to move photo')
+            alert(err.message || 'Failed to move photos')
         } finally {
             setMoving(false)
         }
     }
 
     if (!isOpen) return null
+
+    const count = photos.length
 
     return (
         <div
@@ -65,7 +65,9 @@ export default function MovePhotoModal({
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-xl font-bold text-gray-800">Move Photos</h2>
+                    <h2 className="text-xl font-bold text-gray-800">
+                        Move {count === 1 ? 'Photo' : 'Photos'}
+                    </h2>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -73,7 +75,9 @@ export default function MovePhotoModal({
                     </button>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-4">Choose where to move this photo:</p>
+                <p className="text-sm text-gray-500 mb-4">
+                    Choose where to move {count === 1 ? 'this photo' : `these ${count} photos`}:
+                </p>
 
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                     {/* All Photos option */}

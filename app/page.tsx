@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Profile, PhotoWithUser, FolderWithCount } from '@/types/database'
+import type { SortOption } from '@/components/PhotoGrid'
 import PhotoGrid from '@/components/PhotoGrid'
 import PhotoUpload from '@/components/PhotoUpload'
 import FolderGrid from '@/components/FolderGrid'
@@ -21,6 +22,7 @@ export default function Home() {
   const [loadingData, setLoadingData] = useState(true)
   const [currentFolder, setCurrentFolder] = useState<FolderWithCount | null>(null)
   const [showCreateFolder, setShowCreateFolder] = useState(false)
+  const [sortOption, setSortOption] = useState<SortOption>('newest')
 
   useEffect(() => {
     // If not loading and no user, redirect to login
@@ -74,25 +76,6 @@ export default function Home() {
       .select('*, profile:profiles(*)')
       .order('created_at', { ascending: false })
     if (data) setPhotos(data as PhotoWithUser[])
-  }
-
-  
-
-  // Refresh photos after upload
-  const refreshPhotos = async () => {
-    setLoadingPhotos(true)
-    const { data } = await supabase
-      .from('photos')
-      .select(`
-        *,
-        profile:profiles(*)
-      `)
-      .order('created_at', { ascending: false })
-
-    if (data) {
-      setPhotos(data as PhotoWithUser[])
-    }
-    setLoadingPhotos(false)
   }
 
   // Show loading while checking auth
@@ -206,6 +189,8 @@ export default function Home() {
                 folders={folders}
                 loading={false}
                 onRefresh={fetchAll}
+                sortOption={sortOption}
+                onSortChange={setSortOption}
               />
             </div>
           </>
@@ -219,6 +204,8 @@ export default function Home() {
             loading={false}
             onRefresh={fetchAll}
             emptyMessage={`No photos in ${currentFolder.name} yet!`}
+            sortOption={sortOption}
+            onSortChange={setSortOption}
           />
         )}
       </div>

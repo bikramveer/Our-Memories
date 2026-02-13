@@ -312,7 +312,7 @@ export default function PhotoModal({ photo, folders, isOpen, onClose, onPhotoDel
       {/* Move Photo Modal */}
       {showMoveModal && (
         <MovePhotoModal
-          photo={photo}
+          photos={[photo]}
           folders={folders}
           currentFolderId={photo.folder_id}
           isOpen={showMoveModal}
