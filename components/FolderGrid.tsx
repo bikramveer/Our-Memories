@@ -58,8 +58,9 @@ export default function FolderGrid({ folders, onFolderClick, onFolderDelete }: F
                     className="relative group cursor-pointer"
                     onClick={() => onFolderClick(folder)}
                 >
+                    {/* Folder Card */}
                     <div
-                        className="aspect-square rounded-2xl flex flex-fol items-center justify-center p-4 transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xl"
+                        className="aspect-square rounded-2xl flex flex-col items-center justify-center p-4 transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xl"
                         style={{ background: folder.color }}
                     >
                         {/* Folder icon */}
