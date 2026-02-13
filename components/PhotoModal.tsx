@@ -1,23 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PhotoWithUser, CommentWithUser } from '@/types/database'
+import { PhotoWithUser, CommentWithUser, FolderWithCount } from '@/types/database'
 import { getPhotoUrl, deletePhoto } from '@/lib/storage'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 import CommentSection from './CommentSection'
+import MovePhotoModal from './MovePhotoModal'
 
 interface PhotoModalProps {
   photo: PhotoWithUser
+  folders: FolderWithCount[]
   isOpen: boolean
   onClose: () => void
   onPhotoDeleted: () => void
+  onPhotoMoved: () => void
 }
 
-export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: PhotoModalProps) {
+export default function PhotoModal({ photo, folders, isOpen, onClose, onPhotoDeleted, onPhotoMoved}: PhotoModalProps) {
   const { user } = useAuth()
   const [comments, setComments] = useState<CommentWithUser[]>([])
   const [loadingComments, setLoadingComments] = useState(true)
+  const [showMoveModal, setShowMoveModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
   // Fetch comments when modal opens
@@ -111,6 +115,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
   if (!isOpen) return null
 
   return (
+    // Overlay - clicking anywehre here closes modal
     <div className='modal-overlay' onClick={onClose}>
       {/* Iner wrapper */}
       <div onClick={(e) => e.stopPropagation()}
@@ -169,6 +174,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
           max-h-[45vh]
           '
         >
+          {/* Header */}
           <div className='
             p-4
             border-b
@@ -211,6 +217,32 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
             </div>
 
             <div className='flex items-center gap-2'>
+              {/* Move button */}
+              <button
+                onClick={() => setShowMoveModal(true)}
+                className='
+                  flex
+                  items-center
+                  gap-2
+                  px-3
+                  py-2
+                  text-gray-500
+                  hover:text-white
+                  hover:bg-gray-500
+                  border
+                  border-gray-300
+                  rounded-lg
+                  transition-colors
+                '
+                title='Move photo'
+              >
+                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                <span className='text-sm font-medium'>Move Photo</span>
+              </button>
+
+              {/* Delete Button (only for photo owner) */}
               {user && user.id === photo.user_id && (
                 <button
                   onClick={handleDelete}
@@ -252,6 +284,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
                 </button>
               )}
 
+              {/* Close Button */}
               <button
                 onClick={onClose}
                 className="modal-close-btn"
@@ -264,6 +297,7 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
             </div>
           </div>
 
+          {/* Comments Section */}
           <div className='flex-1 overflow-y-auto min-h-0'>
             <CommentSection
               photoId={photo.id}
@@ -274,6 +308,22 @@ export default function PhotoModal({ photo, isOpen, onClose, onPhotoDeleted }: P
           </div>
         </div>
       </div>
+
+      {/* Move Photo Modal */}
+      {showMoveModal && (
+        <MovePhotoModal
+          photo={photo}
+          folders={folders}
+          currentFolderId={photo.folder_id}
+          isOpen={showMoveModal}
+          onClose={() => setShowMoveModal(false)}
+          onMoved={() => {
+            setShowMoveModal(false)
+            onPhotoMoved()
+            onClose()
+          }}
+        />
+      )}
     </div>
   )
 }
