@@ -14,11 +14,39 @@ export interface Profile {
     updated_at: string              // ISO date string
 }
 
+export interface Album {
+    id: string
+    name: string
+    theme_color: string
+    created_by: string
+    created_at: string
+    updated_at: string
+}
+
+export interface AlbumMember {
+    id: string
+    album_id: string
+    user_id: string
+    role: 'owner' | 'member'
+    joined_at: string
+}
+
+export interface AlbumInvite {
+    id: string
+    album_id: string
+    code: string
+    created_by: string
+    expires_at: string
+    used_count: number
+    created_at: string
+}
+
 export interface Folder {
     id: string
     name: string
     color: string
     user_id: string
+    album_id: string
     created_at: string
     updated_at: string
 }
@@ -26,6 +54,7 @@ export interface Folder {
 export interface Photo {
     id: string                      // UUID
     user_id: string                 // references Profile.id
+    album_id: string
     folder_id: string | null        // null = in All Photos
     storage_path: string            // path in supabase storage
     file_name: string
@@ -48,6 +77,14 @@ export interface Comment {
 // =====================================================
 // EXTENDED TYPES
 // =====================================================
+
+export interface AlbumWithDetails extends Album {
+    photo_count: number
+    member_count: number
+    members: Profile[]
+    cover_photos: string[]          // up to 4 storage paths for 2x2 cover grid
+    user_role: 'owner' | 'member'
+}
 
 export interface FolderWithCount extends Folder {
     photo_count: number
@@ -73,8 +110,15 @@ export interface PhotoWithDetails extends Photo {
 // FORM TYPES
 // =====================================================
 
+export interface NewAlbum {
+    name: string
+    theme_color: string
+    created_by: string
+}
+
 export interface NewPhoto {
     user_id: string
+    album_id: string
     folder_id?: string | null
     storage_path: string
     file_name: string
@@ -82,17 +126,18 @@ export interface NewPhoto {
     mime_type?: string
 }
 
+export interface NewFolder {
+    name: string
+    color: string
+    user_id: string
+    album_id: string
+}
+
 export interface NewComment {
     photo_id: string
     user_id: string
     parent_id?: string | null
     content: string
-}
-
-export interface NewFolder {
-    name: string
-    color: string
-    user_id: string
 }
 
 // =====================================================

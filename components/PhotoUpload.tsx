@@ -8,9 +8,10 @@ import { supabase } from '@/lib/supabase';
 interface PhotoUploadProps {
     onUploadComplete: () => void
     currentFolderId: string | null
+    albumId: string
 }
 
-export default function PhotoUpload({ onUploadComplete, currentFolderId }: PhotoUploadProps) {
+export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId }: PhotoUploadProps) {
     const { user } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId }: Photo
                     .from('photos')
                     .insert({
                         user_id: user.id,
+                        album_id: albumId,
                         storage_path: storagePath,
                         folder_id: currentFolderId,
                         ...metadata,

@@ -8,6 +8,7 @@ interface CreateFolderModalProps {
     isOpen: boolean
     onClose: () => void
     onFolderCreated: () => void
+    albumId: string
 }
 
 const FOLDER_COLORS = [
@@ -19,7 +20,7 @@ const FOLDER_COLORS = [
     { value: 'linear-gradient(135deg, #a78bfa, #8b5cf6)', label: 'Violet' },
 ]
 
-export default function CreateFolderModal({ isOpen, onClose, onFolderCreated }: CreateFolderModalProps) {
+export default function CreateFolderModal({ isOpen, onClose, onFolderCreated, albumId }: CreateFolderModalProps) {
     const { user } = useAuth()
     const [name, setName] = useState('')
     const [selectedColor, setSelectedColor] = useState(FOLDER_COLORS[0].value)
@@ -40,6 +41,7 @@ export default function CreateFolderModal({ isOpen, onClose, onFolderCreated }: 
                     name: name.trim(),
                     color: selectedColor,
                     user_id: user.id,
+                    album_id: albumId,
                 })
 
             if (error) throw (error)
