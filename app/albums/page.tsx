@@ -213,11 +213,11 @@ function AlbumCard({ album, onOpen, onRefresh }: {
             >
                 {/* Cover Photos */}
                 <div 
-                    className="relative h-52 overflow-hidden"
+                    className="relative h-52 overflow-hidden rounded-2xl will-change-transform"
                     style={{ background: album.theme_color }}
                 >
                     {album.cover_photos.length > 0 ? (
-                        <div className={`grid ${album.cover_photos.length  === 1 ? 'grid-cols-1' : 'grid-cosls-2'} h-full gap-0.5`}>
+                        <div className={`grid ${album.cover_photos.length  === 1 ? 'grid-cols-1' : 'grid-cols-2'} h-full gap-0.5`}>
                             {album.cover_photos.slice(0, 4).map((path, i) => (
                                 <div
                                     key={i}

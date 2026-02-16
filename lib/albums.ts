@@ -22,16 +22,24 @@ export async function fetchUserAlbums(userId: string): Promise<AlbumWithDetails[
 
     // for each album, get members, photo count, and cover photos
     const albumsWithDetails = await Promise.all(
-        albums?.map(async (album) => {
+        albums.map(async (album) => {
             const membership = memberships.find(m => m.album_id === album.id)
 
             // Get members with profiles
             const { data: memberRows } = await supabase
                 .from('album_members')
-                .select('user_id, role, profiles(*)')
-                .eq('album_id', album.id)
+                .select('user_id, role')
+                .eq('album_id',album.id)
 
-            const members = memberRows?.map((m: any) => m.profiles).filter(Boolean) || []
+            let members: any[] = []
+            if (memberRows && memberRows.length > 0) {
+                const userIds = memberRows.map(m => m.user_id)
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .in('id', userIds)
+                members = profiles || []
+            }
 
             // Get photo count
             const { count } = await supabase
@@ -95,7 +103,7 @@ export async function joinAlbumWithCode(
         .from('album_invites')
         .select('*')
         .eq('code', code.toUpperCase().trim())
-        .single()
+        .maybeSingle()
 
     if (!invite) return { success: false, error: 'Invalid invite code.' }
 
@@ -109,7 +117,7 @@ export async function joinAlbumWithCode(
         .select('id')
         .eq('album_id', invite.album_id)
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
 
     if (existing) {
         return { success: true, albumId: invite.album_id } // alredy in, don't have to error out, just navigate

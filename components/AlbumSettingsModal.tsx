@@ -64,7 +64,7 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
             .gt('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false })
             .limit(1)
-            .single()
+            .maybeSingle()
         
         if (data) setInviteCode(data.code)
     }
@@ -155,6 +155,8 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
                 .eq('id', album.id)
 
             if (error) throw error
+
+            onDeleted()
         } catch (err: any) {
             setError(err.message || 'Failed to delete album')
         } finally {
