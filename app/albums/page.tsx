@@ -165,20 +165,12 @@ export default function AlbumsPage() {
                 {albums.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {albums.map(album => (
-                            <div
+                            <AlbumCard 
                                 key={album.id}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    albumSelected ? router.push(`/album/${album.id}`) : setAlbumSelected(false)
-                                }}
-                            >
-                                <AlbumCard 
-                                    key={album.id}
-                                    album={album}
-                                    onOpen={() => router.push(`/album/${album.id}`)}
-                                    onRefresh={loadData}
-                                />
-                            </div>
+                                album={album}
+                                onOpen={() => router.push(`/album/${album.id}`)}
+                                onRefresh={loadData}
+                            />
                         ))}
                     </div>
                 )}
@@ -219,6 +211,7 @@ function AlbumCard({ album, onOpen, onRefresh }: {
                 className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
+                onClick={onOpen}
             >
                 {/* Cover Photos */}
                 <div 
@@ -308,7 +301,7 @@ function AlbumCard({ album, onOpen, onRefresh }: {
                     </div>
 
                     <button
-                        onClick={onOpen}
+                        onClick={(e) => { e.stopPropagation(); onOpen() }}
                         className="w-full py-3 rounded-full text-white font-semibold transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-95"
                         style={{
                             background: album.theme_color

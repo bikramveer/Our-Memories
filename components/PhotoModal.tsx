@@ -131,7 +131,7 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
 
   return (
     // Overlay - clicking anywehre here closes modal
-    <div className='modal-overlay' onClick={onClose}>
+    <div className='modal-overlay overflow-hidden' onClick={onClose}>
       {/* Inner wrapper */}
       <div onClick={(e) => e.stopPropagation()}
         className='
