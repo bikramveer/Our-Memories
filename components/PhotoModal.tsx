@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { PhotoWithUser, CommentWithUser, FolderWithCount } from '@/types/database'
 import { getPhotoUrl, deletePhoto } from '@/lib/storage'
 import { supabase } from '@/lib/supabase'
@@ -26,6 +26,19 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
   const [showMoveModal, setShowMoveModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const photoRef = useRef<HTMLDivElement>(null)
+  const [photoHeight, setPhotoHeight] = useState<number | null>(null)
+
+  // Sync sidebar height to photo height on desktop
+  useEffect(() => {
+    if (!isOpen || !photoRef.current) return
+    const observer = new ResizeObserver(entries => {
+      const height = entries[0]?.contentRect.height
+      if (height) setPhotoHeight(height)
+    })
+    observer.observe(photoRef.current)
+    return () => observer.disconnect()
+  }, [isOpen])
 
   // Fetch comments when modal opens
   useEffect(() => {
@@ -112,18 +125,29 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
     }
   }
 
-  // Close on escape key
+  // Close on escape key + lock body scroll
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
+      // save scroll position then lock - prevents page jumping on close
+      const scrollY = window.scrollY
       document.body.style.overflow = 'hidden'
+      document.body.style.position ='fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
     }
     return () => {
       document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
+      // Restore scroll position exactly where user was
+      const scrollY = document.body.style.top
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      window.scrollTo(0, parseInt(scrollY || '0') * -1)
     }
   }, [isOpen, onClose])
 
@@ -138,7 +162,7 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
           flex
           flex-col
           md:flex-row
-          items-stretch
+          md:items-start
           rounded-xl
           overflow-hidden
           shadow-2xl
@@ -148,16 +172,18 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
           max-h-[90vh]
           '
       >
-        {/* Photo */}
-        <div className='
-          relative
-          flex
-          items-center
-          justify-center
-          bg-transparent
-          overflow-hidden
-          md:max-w-[65vw]
-          flex-shrink-0
+        {/* Photo — natural size, transparent bg, ref for height measurement */}
+        <div
+          ref={photoRef}
+          className='
+            relative
+            flex
+            items-center
+            justify-center
+            bg-transparent
+            overflow-hidden
+            md:max-w-[65vw]
+            flex-shrink-0
           '
         >
           <img
@@ -169,25 +195,35 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
               md:w-auto
               md:h-auto
               md:max-h-[90vh]
-              md:max-w-[40vw]
-              max-h-[50vh]
+              md:max-w-[55vw]
+              max-h-[45vh]
               object-contain
               rounded-l-xl
-              '
-            />
+            '
+          />
         </div>
 
-        {/* Sidebar */}
-        <div className='
-          w-full
-          md:w-[380px]
-          md:flex-shrink-0
-          bg-white
-          flex
-          flex-col
-          md:max-h-[90vh]
-          max-h-[45vh]
+        {/* Sidebar — height locked to photo height on desktop via JS */}
+        <div
+          className='
+            w-full
+            md:w-[380px]
+            md:flex-shrink-0
+            bg-white
+            flex
+            flex-col
+            overflow-hidden
+            min-h-0
+            max-h-[45vh]
+            md:max-h-none
           '
+          style={{
+            // On desktop: exactly match photo height so comments never overflow it
+            // On mobile: ignored, max-h-[45vh] handles it
+            height: typeof window !== 'undefined' && window.innerWidth >= 768 && photoHeight
+              ? `${photoHeight}px`
+              : undefined
+          }}
         >
           {/* Header */}
           <div className='p-4 border-b border-gray-200 flex-shrink-0'>
@@ -288,7 +324,7 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
           </div>
 
           {/* Comments Section */}
-          <div className='flex-1 overflow-y-auto min-h-0'>
+          <div className='flex-1 overflow-hidden min-h-0 flex flex-col'>
             <CommentSection
               photoId={photo.id}
               comments={comments}

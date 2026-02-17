@@ -46,9 +46,9 @@ export default function CommentSection({ photoId, comments, loading, onCommentAd
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Comments list */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
@@ -70,7 +70,7 @@ export default function CommentSection({ photoId, comments, loading, onCommentAd
       </div>
 
       {/* Add comment form */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 p-4 flex-shrink-0">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
