@@ -17,6 +17,7 @@ export default function AlbumPage() {
     const router = useRouter()
     const params = useParams()
     const albumId = params.id as string
+    const albumName = params.name as string
 
     const [profile, setProfile] = useState<Profile | null>(null)
     const [album, setAlbum] = useState<AlbumWithDetails | null>(null)
@@ -222,6 +223,8 @@ export default function AlbumPage() {
                       <PhotoGrid
                         photos={visiblePhotos}
                         folders={folders}
+                        albumName={albumName}
+                        currentFolder={null}
                         loading={false}
                         onRefresh={fetchAll}
                         sortOption={sortOption}
@@ -236,6 +239,8 @@ export default function AlbumPage() {
                   <PhotoGrid
                     photos={visiblePhotos}
                     folders={folders}
+                    albumName={albumName}
+                    currentFolder={currentFolder.name}
                     loading={false}
                     onRefresh={fetchAll}
                     emptyMessage={`No photos in ${currentFolder.name} yet!`}
