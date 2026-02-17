@@ -97,7 +97,7 @@ export default function MovePhotoModal({
                         </div>
                         <div>
                             <p className="font-medium text-gray-800">All Photos</p>
-                            <p className="text-xs text-gray-500">No folder</p>
+                            {/* <p className="text-xs text-gray-500">No folder</p> */}
                         </div>
                         {currentFolderId === null && (
                             <span className="ml-auto text-pink-500 text-xs font-medium">Current</span>
