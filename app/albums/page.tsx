@@ -17,6 +17,7 @@ export default function AlbumsPage() {
     const router = useRouter()
     const [albums, setAlbums] = useState<AlbumWithDetails[]>([])
     const [loadingAlbums, setLoadingAlbums] = useState(true)
+    const [albumSelected, setAlbumSelected] = useState(false)
     const [showCreate, setShowCreate] = useState(false)
     const [showJoin, setShowJoin] = useState(false)
     const [profile, setProfile] = useState<any>(null)
@@ -210,6 +211,7 @@ function AlbumCard({ album, onOpen, onRefresh }: {
                 className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
+                onClick={onOpen}
             >
                 {/* Cover Photos */}
                 <div 
@@ -271,7 +273,12 @@ function AlbumCard({ album, onOpen, onRefresh }: {
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <span>Shared with {memberNames}</span>
+                            {/* <span>Shared with {memberNames}</span> */}
+                            {memberNames.length > 2 ? (
+                                <span>Not shared with anyone yet</span>
+                            ) : (
+                                <span>Shared with {memberNames}</span>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -294,7 +301,7 @@ function AlbumCard({ album, onOpen, onRefresh }: {
                     </div>
 
                     <button
-                        onClick={onOpen}
+                        onClick={(e) => { e.stopPropagation(); onOpen() }}
                         className="w-full py-3 rounded-full text-white font-semibold transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-95"
                         style={{
                             background: album.theme_color
