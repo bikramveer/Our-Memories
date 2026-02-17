@@ -229,7 +229,7 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
               <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className='flex items-center justify-center gap-2 flex-1 py-2.5 text-blue-500 hover:text-white hover:bg-blue-600 border-2 border-blue-300 hover:border-blue-600 rounded-lg transition-colors disabled:opacity-50 font-medium text-sm'
+                className='flex items-center justify-center gap-2 flex-1 py-2.5 text-blue-600 hover:bg-blue-50 border-2 bg-white border-blue-300 rounded-lg transition-colors disabled:opacity-50 font-medium text-sm'
                 title='Download photo'
               >
                 {downloading ? (
