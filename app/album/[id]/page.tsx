@@ -119,8 +119,82 @@ export default function AlbumPage() {
 
                   {/* Dekstop - single row */}
                   <div className="hidden sm:flex items-center justify-between">
-                    
-                  </div>
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentFolder(null)}>
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-800">Our Memories</h1>
+                            <p className="text-sm text-gray-500">
+                                Welcome, {profile.name}! 💕
+                                <span className="mx-1.5 text-gray-300">·</span>
+                                <span className="font-semibold" style={{ color: 'rgb(168 85 247)' }}>{album.name}</span>
+                            </p>
+                        </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => router.push('/albums')}
+                                className="flex items-center gap-2 px-4 py-2 rounded-full border-2 border-purple-300 text-purple-500 font-semibold hover:bg-purple-50 transition-colors text-sm"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                                Switch Album
+                            </button>
+                            <PhotoUpload onUploadComplete={fetchAll} currentFolderId={currentFolder?.id ?? null} albumId={albumId} />
+                            <button onClick={signOut} className="p-2 text-gray-500 hover:text-pink-500 transition-colors" title="Sign out">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* ── Mobile: two rows ────────────────────────────────── */}
+                    <div className="sm:hidden">
+                        {/* Row 1: Logo + title + sign out */}
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentFolder(null)}>
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h1 className="text-sm font-bold text-gray-800 leading-tight">Our Memories</h1>
+                                    <p className="text-xs text-gray-500 leading-tight">
+                                        Welcome, {profile.name}! 💕
+                                        <span className="mx-1 text-gray-300">·</span>
+                                        <span className="font-semibold" style={{ color: 'rgb(168 85 247)' }}>{album.name}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={signOut} className="p-1.5 text-gray-500 hover:text-pink-500 transition-colors" title="Sign out">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Row 2: Switch Album + Upload, each taking half the width */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => router.push('/albums')}
+                                className="flex items-center justify-center gap-2 flex-1 py-2 rounded-full border-2 border-purple-300 text-purple-500 font-semibold hover:bg-purple-50 transition-colors text-sm"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                                Switch Album
+                            </button>
+                            <div className="flex-1">
+                                <PhotoUpload onUploadComplete={fetchAll} currentFolderId={currentFolder?.id ?? null} albumId={albumId} />
+                            </div>
+                        </div>
+                    </div>
 
                   {/* Mobile - double row */}
                   
