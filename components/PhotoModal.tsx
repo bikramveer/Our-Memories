@@ -7,22 +7,25 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 import CommentSection from './CommentSection'
 import MovePhotoModal from './MovePhotoModal'
+import { downloadSinglePhoto, downloadPhotosAsZip } from '@/lib/downloadHelpers'
 
 interface PhotoModalProps {
   photo: PhotoWithUser
   folders: FolderWithCount[]
+  albumName: string
   isOpen: boolean
   onClose: () => void
   onPhotoDeleted: () => void
   onPhotoMoved: () => void
 }
 
-export default function PhotoModal({ photo, folders, isOpen, onClose, onPhotoDeleted, onPhotoMoved}: PhotoModalProps) {
+export default function PhotoModal({ photo, folders, albumName, isOpen, onClose, onPhotoDeleted, onPhotoMoved}: PhotoModalProps) {
   const { user } = useAuth()
   const [comments, setComments] = useState<CommentWithUser[]>([])
   const [loadingComments, setLoadingComments] = useState(true)
   const [showMoveModal, setShowMoveModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   // Fetch comments when modal opens
   useEffect(() => {
@@ -66,6 +69,18 @@ export default function PhotoModal({ photo, folders, isOpen, onClose, onPhotoDel
       setComments(commentsWithReplies)
     }
     setLoadingComments(false)
+  }
+
+  const handleDownload = async () => {
+    setDownloading(true)
+    try {
+      const folderName = folders.find(f => f.id === photo.folder_id)?.name
+      await downloadSinglePhoto(photo, albumName, folderName)
+    } catch (err) {
+      console.error('Download error:', err)
+    } finally {
+      setDownloading(false)
+    }
   }
 
   const handleDelete = async () => {
@@ -117,7 +132,7 @@ export default function PhotoModal({ photo, folders, isOpen, onClose, onPhotoDel
   return (
     // Overlay - clicking anywehre here closes modal
     <div className='modal-overlay' onClick={onClose}>
-      {/* Iner wrapper */}
+      {/* Inner wrapper */}
       <div onClick={(e) => e.stopPropagation()}
         className='
           flex
@@ -175,125 +190,100 @@ export default function PhotoModal({ photo, folders, isOpen, onClose, onPhotoDel
           '
         >
           {/* Header */}
-          <div className='
-            p-4
-            border-b
-            border-gray-200
-            flex
-            items-center
-            justify-between
-            flex-shrink-0
-            '
-          >
-            <div className='flex items-center gap-3'>
-              <div className='
-                w-10
-                h-10
-                rounded-full
-                bg-gradient-to-br
-                from-pink-500
-                to-purple-500
-                flex
-                items-center
-                justify-center
-                text-white
-                font-semibold
-                '
+          <div className='p-4 border-b border-gray-200 flex-shrink-0'>
+            {/* User info row */}
+            <div className='flex items-center justify-between mb-4'>
+              <div className='flex items-center gap-3'>
+                <div className='w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-semibold'>
+                  {photo.profile?.name?.[0]?.toUpperCase() || '?'}
+                </div>
+                <div>
+                  <p className='font-semibold text-gray-800'>
+                    {photo.profile?.name || 'Unknown'}
+                  </p>
+                  <p className='text-xs text-gray-500'>
+                    {new Date(photo.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Close button only */}
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Close modal"
               >
-                {photo.profile?.name?.[0]?.toUpperCase() || '?'}
-              </div>
-              <div>
-                <p className='font-semibold text-gray-800'>
-                  {photo.profile?.name || 'Unknown'}
-                </p>
-                <p className='text-xs text-gray-500'>
-                  {new Date(photo.created_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </p>
-              </div>
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
+            {/* Action buttons row */}
             <div className='flex items-center gap-2'>
-              {/* Move button */}
+              {/* Download */}
+              <button
+                onClick={handleDownload}
+                disabled={downloading}
+                className='flex items-center justify-center gap-2 flex-1 py-2.5 text-blue-500 hover:text-white hover:bg-blue-600 border-2 border-blue-300 hover:border-blue-600 rounded-lg transition-colors disabled:opacity-50 font-medium text-sm'
+                title='Download photo'
+              >
+                {downloading ? (
+                  <>
+                    <svg className='animate-spin h-4 w-4' viewBox='0 0 24 24'>
+                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' fill='none' />
+                      <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4' />
+                    </svg>
+                    Download
+                  </>
+                )}
+              </button>
+
+              {/* Move */}
               <button
                 onClick={() => setShowMoveModal(true)}
-                className='
-                  flex
-                  items-center
-                  gap-2
-                  px-3
-                  py-2
-                  text-gray-500
-                  hover:text-white
-                  hover:bg-gray-500
-                  border
-                  border-gray-300
-                  rounded-lg
-                  transition-colors
-                '
+                className='flex items-center justify-center gap-2 flex-1 py-2.5 text-gray-700 hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors font-medium text-sm'
                 title='Move photo'
               >
                 <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
-                <span className='text-sm font-medium'>Move Photo</span>
+                Move
               </button>
 
-              {/* Delete Button (only for photo owner) */}
+              {/* Delete (only for photo owner) */}
               {user && user.id === photo.user_id && (
                 <button
                   onClick={handleDelete}
                   disabled={deleting}
-                  className='
-                    flex
-                    items-center
-                    gap-2
-                    px-3
-                    py-2
-                    text-red-500
-                    hover:text-white
-                    hover:bg-red-500
-                    border
-                    border-red-500
-                    rounded-lg
-                    transition-colors
-                    '
+                  className='flex items-center justify-center gap-2 flex-1 py-2.5 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-50 font-medium text-sm'
                   title='Delete photo'
                 >
                   {deleting ? (
-                    <>
-                      <svg className='animate-spin h-4 w-4' viewBox='0 0 24 24'>
-                        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' fill='none' />
-                        <path className='opacity-75' fill='currentColor'
-                          d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
-                      </svg>
-                      <span className='text-sm'>Deleting...</span>
-                    </>
+                    <svg className='animate-spin h-4 w-4' viewBox='0 0 24 24'>
+                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' fill='none' />
+                      <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
+                    </svg>
                   ) : (
                     <>
                       <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2}
-                          d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' />
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' />
                       </svg>
-                      <span className='text-sm font-medium'>Delete</span>
+                      Delete
                     </>
                   )}
                 </button>
               )}
-
-              {/* Close Button */}
-              <button
-                onClick={onClose}
-                className="modal-close-btn"
-                aria-label="Close modal"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
           </div>
 

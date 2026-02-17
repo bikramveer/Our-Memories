@@ -2,7 +2,8 @@ import { supabase } from "./supabase";
 
 // -- Filename Helpers
 
-function sanitize(str: string): string {
+function sanitize(str: string | undefined | null): string {
+    if (!str) return ''
     return str.replace(/[^a-zA-Z0-9]/g, '')
 }
 

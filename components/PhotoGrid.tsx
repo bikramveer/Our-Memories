@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { PhotoWithUser, FolderWithCount } from "@/types/database";
 import { deletePhoto, getPhotoUrl } from "@/lib/storage";
+import { downloadPhotosAsZip, downloadSinglePhoto } from "@/lib/downloadHelpers";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import PhotoModal from "./PhotoModal";
@@ -13,6 +14,8 @@ export type SortOption = 'newest' | 'oldest' | 'user_az' | 'filename_az';
 interface PhotoGridProps {
     photos: PhotoWithUser[],
     folders: FolderWithCount[],
+    albumName: string,
+    currentFolder: string | null,
     loading: boolean,
     onRefresh: () => void,
     emptyMessage?: string
@@ -38,11 +41,13 @@ function sortPhotos(photos: PhotoWithUser[], sort: SortOption): PhotoWithUser[] 
     })
 };
 
-export default function PhotoGrid({ photos, folders, loading, onRefresh, emptyMessage, sortOption, onSortChange }: PhotoGridProps) {
+export default function PhotoGrid({ photos, folders, albumName, currentFolder, loading, onRefresh, emptyMessage, sortOption, onSortChange }: PhotoGridProps) {
     const [selectedPhoto, setSelectedPhoto] = useState<PhotoWithUser | null>(null)
     const [selectMode, setSelectMode] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [showMoveMulti, setShowMoveMulti] = useState(false)
+    const [downloadingMulti, setDownloadingMulti] = useState(false)
+    const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 })
     const [deletingMulti, setDeletingMulti] = useState(false)
 
     const sortedPhotos = useMemo(() => sortPhotos(photos, sortOption), [photos, sortOption])
@@ -59,6 +64,53 @@ export default function PhotoGrid({ photos, folders, loading, onRefresh, emptyMe
     })
     const selectAll = () => setSelectedIds(new Set(sortedPhotos.map(p => p.id)))
     const deselectAll = () => setSelectedIds(new Set())
+
+    const handleBulkDownload = async () => {
+        const count = selectedPhotos.length
+
+        // for 1-9 photos
+        if (count < 10) {
+            setDownloadingMulti(true)
+            setDownloadProgress({ current: 0, total: count })
+
+            try {
+                for (let i = 0; i < selectedPhotos.length; i++) {
+                    const photo = selectedPhotos[i]
+                    const folderName = folders.find(f => f.id === photo.folder_id)?.name
+                    await downloadSinglePhoto(photo, albumName, folderName)
+                    setDownloadProgress({ current: i + 1, total: count})
+                    // add small delay between downloads so browser doesn't stop themn
+                    await new Promise(resolve => setTimeout(resolve, 300))
+                }
+            } catch (err) {
+                console.error('Download err:', err)
+                alert('Failed to donwload some photos')
+            } finally {
+                setDownloadingMulti(false)
+                setDownloadProgress({ current: 0, total: 0})
+            }
+        }
+
+        // for 10+ photos
+        else {
+            setDownloadingMulti(true)
+            setDownloadProgress({ current: 0, total: count })
+            try {
+                await downloadPhotosAsZip(
+                    selectedPhotos,
+                    albumName,
+                    currentFolder,
+                    (current, total) => setDownloadProgress({ current, total })
+                )
+            } catch (err) {
+                console.error('Download error:', err)
+                alert('Failed to download photos')
+            } finally {
+                setDownloadingMulti(false)
+                setDownloadProgress({ current: 0, total: 0 })
+            }
+        }
+    }
 
     const handleBulkDelete = async () => {
         const n = selectedIds.size
@@ -244,6 +296,31 @@ export default function PhotoGrid({ photos, folders, loading, onRefresh, emptyMe
 
                             {selectedIds.size > 0 && (
                                 <button
+                                    onClick={handleBulkDownload}
+                                    disabled={downloadingMulti}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full border-2 border-blue-300 bg-white text-blue-600 text-sm font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                                >
+                                    {downloadingMulti ? (
+                                        <>
+                                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx='12' cy='12' r='10' stroke="currentColor" strokeWidth='4' fill="none" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            {selectedIds.size < 10 ? `${downloadProgress.current}/${downloadProgress.total}` : `Zipping ${downloadProgress.current}/${downloadProgress.total}`}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                            {selectedIds.size < 10 ? `Downlaod (${selectedIds.size})` : `Download Zip (${selectedIds.size})`}
+                                        </>
+                                    )}
+                                </button>
+                            )}
+
+                            {selectedIds.size > 0 && (
+                                <button
                                     onClick={handleBulkDelete}
                                     disabled={deletingMulti}
                                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors disabled:opacity-50"
@@ -335,6 +412,7 @@ export default function PhotoGrid({ photos, folders, loading, onRefresh, emptyMe
                 <PhotoModal
                     photo={selectedPhoto}
                     folders={folders}
+                    albumName={albumName}
                     isOpen={!!selectedPhoto}
                     onClose={() => setSelectedPhoto(null)}
                     onPhotoDeleted={() => {
