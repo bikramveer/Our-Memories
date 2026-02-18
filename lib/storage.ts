@@ -43,12 +43,37 @@ export async function uploadMultiplePhotos (
     return Promise.all(uploadPromises);
 }
 
-export function getPhotoUrl(storagePath: string): string {
-    const { data } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(storagePath)
+export async function generateSignedUrl(storagePath: string): Promise<string> {
+  const { data, error } = await supabase
+    .storage
+    .from(BUCKET_NAME)
+    .createSignedUrl(storagePath, 3600)
 
-    return data.publicUrl;
+  if (error || !data?.signedUrl) {
+    console.error('Failed to generate signed URL for:', storagePath, error)
+    return ''
+  }
+
+  return data.signedUrl
+}
+
+export async function generateSignedUrls(storagePaths: string[]): Promise<Record<string, string>> {
+  const results = await Promise.all(
+    storagePaths.map(async (path) => ({
+      path,
+      url: await generateSignedUrl(path)
+    }))
+  )
+
+  return results.reduce((acc, { path, url }) => {
+    acc[path] = url
+    return acc
+  }, {} as Record<string, string>)
+}
+
+export function getPhotoUrl(storagePath: string): string {
+  console.warn('getPhotoUrl called direclty - consider pre-generating signed URLs in fetch function')
+  return storagePath
 }
 
 export async function deletePhoto(storagePath: string): Promise<boolean> {

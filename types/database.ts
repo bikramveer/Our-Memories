@@ -92,7 +92,8 @@ export interface FolderWithCount extends Folder {
 }
 
 export interface PhotoWithUser extends Photo {
-    profile: Profile                // User who uploaded the photo
+    profile: Profile | null                // User who uploaded the photo
+    signed_url?: string 
 }
 
 export interface CommentWithUser extends Comment {

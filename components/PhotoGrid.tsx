@@ -213,8 +213,8 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
                         Let's start filling in our memories 💖
                     </p>
 
-                    <p className="text-sm text-gray-500 flex justify-center align-center">
-                        Click the <span className="text-pink-500 font-semibold">Upload</span> button above to add photos!
+                    <p className="text-sm text-gray-500 justify-center align-center">
+                        Click the<span className="text-pink-500 font-semibold"> Upload </span> button above to add photos!
                     </p>
                 </div>
             </div>
@@ -369,7 +369,7 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
                             >
                                 <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100">
                                     <Image
-                                        src={getPhotoUrl(photo.storage_path)}
+                                        src={photo.signed_url || getPhotoUrl(photo.storage_path)}
                                         alt={photo.file_name}
                                         fill
                                         className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -394,7 +394,7 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
 
                                 {/* Hover overlay (normal mode) */}
                                 {!selectMode && (
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex itmes-end p-4">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-end p-4">
                                         <div className="text-white">
                                             <p className="font-medium text-sm">{photo.profile?.name || 'Unknown'}</p>
                                             <p className="text-xs opacity-90">{new Date(photo.created_at).toLocaleDateString()}</p>

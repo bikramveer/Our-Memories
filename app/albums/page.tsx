@@ -226,7 +226,7 @@ function AlbumCard({ album, onOpen, onRefresh }: {
                                     className="relative overflow-hidden"
                                 >
                                     <img
-                                        src={getPhotoUrl(path)}
+                                        src={(path)}
                                         alt=""
                                         className={`w-full h-full object-cover transition-all duration-300 ${hovered ? 'brightness-100' : 'brightness-75'}`}
                                     />
