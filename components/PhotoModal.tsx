@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { PhotoWithUser, CommentWithUser, FolderWithCount } from '@/types/database'
 import { getPhotoUrl, deletePhoto } from '@/lib/storage'
+import { downloadSinglePhoto } from '@/lib/downloadHelpers'
 import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 import { useAuth } from './AuthProvider'
 import CommentSection from './CommentSection'
 import MovePhotoModal from './MovePhotoModal'
-import { downloadSinglePhoto, downloadPhotosAsZip } from '@/lib/downloadHelpers'
+import ConfirmModal from './ConfirmModal'
 
 interface PhotoModalProps {
   photo: PhotoWithUser
@@ -24,6 +26,7 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
   const [comments, setComments] = useState<CommentWithUser[]>([])
   const [loadingComments, setLoadingComments] = useState(true)
   const [showMoveModal, setShowMoveModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const photoRef = useRef<HTMLDivElement>(null)
@@ -89,8 +92,10 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
     try {
       const folderName = folders.find(f => f.id === photo.folder_id)?.name
       await downloadSinglePhoto(photo, albumName, folderName)
+      toast.success('Photo downloaded successfully')
     } catch (err) {
       console.error('Download error:', err)
+      toast.error('Failed to download image')
     } finally {
       setDownloading(false)
     }
@@ -98,16 +103,11 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
 
   const handleDelete = async () => {
     if (!user || user.id !== photo.user_id) return
-    
-    const confirmed = confirm('Are you sure you want to delete this photo? This cannot be undone.')
-    if (!confirmed) return
 
-    setDeleting(true)
+    setDownloading(true)
     try {
-      // Delete from storage
       await deletePhoto(photo.storage_path)
 
-      // Delete from database (comments will cascade delete automatically)
       const { error } = await supabase
         .from('photos')
         .delete()
@@ -115,11 +115,13 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
 
       if (error) throw error
 
+      toast.success('Photo deleted successfully')
       onPhotoDeleted()
       onClose()
+      setShowDeleteConfirm(false)
     } catch (error) {
       console.error('Delete error:', error)
-      alert('Failed to delete photo')
+      toast.error('Failed to delete photo')
     } finally {
       setDeleting(false)
     }
