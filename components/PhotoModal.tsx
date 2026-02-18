@@ -187,7 +187,7 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
           '
         >
           <img
-            src={getPhotoUrl(photo.storage_path)}
+            src={photo.signed_url || getPhotoUrl(photo.storage_path)}
             alt={photo.file_name}
             className='
               block

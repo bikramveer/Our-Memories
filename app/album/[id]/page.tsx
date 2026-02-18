@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase"
 import { Profile, PhotoWithUser, FolderWithCount, AlbumWithDetails} from '@/types/database'
 import type { SortOption } from "@/components/PhotoGrid"
 import { fetchUserAlbums } from "@/lib/albums"
+import { generateSignedUrls } from "@/lib/storage"
 import PhotoGrid from "@/components/PhotoGrid"
 import PhotoUpload from "@/components/PhotoUpload"
 import FolderGrid from "@/components/FolderGrid"
@@ -84,13 +85,34 @@ export default function AlbumPage() {
       }
     }
 
+    // const fetchPhotos = async () => {
+    //   const { data } = await supabase
+    //     .from('photos')
+    //     .select('*, profile:profiles(*)')
+    //     .eq('album_id', albumId)
+    //     .order('created_at', { ascending: false })
+    //   if (data) setPhotos(data as PhotoWithUser[])
+    // }
+
     const fetchPhotos = async () => {
       const { data } = await supabase
         .from('photos')
         .select('*, profile:profiles(*)')
         .eq('album_id', albumId)
         .order('created_at', { ascending: false })
-      if (data) setPhotos(data as PhotoWithUser[])
+
+      if (data) {
+        const storagePaths = data.map(photo => photo.storage_path)
+
+        const signedUrls = await generateSignedUrls(storagePaths)
+
+        const photosWithUrls = data.map(photo => ({
+          ...photo,
+          signed_url: signedUrls[photo.storage_path] || ''
+        }))
+
+        setPhotos(photosWithUrls as PhotoWithUser[])
+      }
     }
 
         // Show loading while checking auth
@@ -129,7 +151,7 @@ export default function AlbumPage() {
                             <h1 className="text-xl font-bold text-gray-800">Our Memories</h1>
                             <p className="text-sm text-gray-500">
                                 Welcome, {profile.name}! 💕
-                                <span className="mx-1.5 text-gray-300">·</span>
+                                <span className="mx-1.5 text-black">⚬</span>
                                 <span className="font-semibold" style={{ color: 'rgb(168 85 247)' }}>{album.name}</span>
                             </p>
                         </div>

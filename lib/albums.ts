@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { AlbumWithDetails } from "@/types/database";
+import { generateSignedUrls } from "./storage";
 
 // fetch all albums the current user belongs to
 export async function fetchUserAlbums(userId: string): Promise<AlbumWithDetails[]> {
@@ -55,12 +56,19 @@ export async function fetchUserAlbums(userId: string): Promise<AlbumWithDetails[
                 .order('created_at', { ascending: false })
                 .limit(4)
 
+            const storagePaths = coverPhotos?.map(p => p.storage_path) || []
+            const signedUrls = storagePaths.length > 0
+                ? await generateSignedUrls(storagePaths)
+                : {}
+
+            const coverPhotosWithUrls = storagePaths.map(path => signedUrls[path] || '')
+
             return {
                 ...album,
                 photo_count: count || 0,
                 member_count: members.length,
                 members,
-                cover_photos: coverPhotos?.map(p => p.storage_path) || [],
+                cover_photos: coverPhotosWithUrls,
                 user_role: membership?.role as 'owner' | 'member',
             } as AlbumWithDetails
         })

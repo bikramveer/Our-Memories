@@ -20,7 +20,7 @@ const THEME_COLORS = [
 ]
 
 export default function CreateAlbumModal({ isOpen, onClose, onCreated }: Props) {
-  const { user } = useAuth()
+  const { user }                    = useAuth()
   const [name, setName]             = useState('')
   const [themeColor, setThemeColor] = useState(THEME_COLORS[0].value)
   const [creating, setCreating]     = useState(false)
@@ -29,11 +29,12 @@ export default function CreateAlbumModal({ isOpen, onClose, onCreated }: Props) 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || !user) return
-    setCreating(true); setError(null)
-
+    setCreating(true)
+    setError(null)
+  
     try {
-      // Create the album
-      const { data: album, error: albumError } = await supabase
+      // Test 1: Does the insert work WITHOUT .select()?
+      const { data: album, error: insertError } = await supabase
         .from('albums')
         .insert({
           name: name.trim(),
@@ -42,21 +43,29 @@ export default function CreateAlbumModal({ isOpen, onClose, onCreated }: Props) 
         })
         .select()
         .single()
-
-      if (albumError || !album) throw albumError || new Error('Failed to create album')
-
+  
+      if (insertError || !album) {
+        throw insertError || new Error('Failed to create album')
+      }
+  
       // Add creator as owner member
       const { error: memberError } = await supabase
         .from('album_members')
-        .insert({ album_id: album.id, user_id: user.id, role: 'owner' })
-
+        .insert({
+          album_id: album.id,
+          user_id: user.id,
+          role: 'owner'
+        })
+  
       if (memberError) throw memberError
-
+  
       onCreated(album.id)
       onClose()
-      setName(''); setThemeColor(THEME_COLORS[0].value)
+      setName('')
+      setThemeColor(THEME_COLORS[0].value)
     } catch (err: any) {
       setError(err.message || 'Failed to create album')
+      console.error('Create album error:', err)
     } finally {
       setCreating(false)
     }
