@@ -47,7 +47,7 @@ export async function generateSignedUrl(storagePath: string): Promise<string> {
   const { data, error } = await supabase
     .storage
     .from(BUCKET_NAME)
-    .createSignedUrl(storagePath, 3600)
+    .createSignedUrl(storagePath, 86400)
 
   if (error || !data?.signedUrl) {
     console.error('Failed to generate signed URL for:', storagePath, error)
