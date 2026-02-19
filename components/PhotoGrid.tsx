@@ -4,10 +4,12 @@ import { useState, useMemo } from "react";
 import { PhotoWithUser, FolderWithCount } from "@/types/database";
 import { deletePhoto, getPhotoUrl } from "@/lib/storage";
 import { downloadPhotosAsZip, downloadSinglePhoto } from "@/lib/downloadHelpers";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import PhotoModal from "./PhotoModal";
 import MovePhotoModal from "./MovePhotoModal";
+import ConfirmModal from "./ConfirmModal";
 
 export type SortOption = 'newest' | 'oldest' | 'user_az' | 'filename_az';
 
@@ -49,6 +51,7 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
     const [downloadingMulti, setDownloadingMulti] = useState(false)
     const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 })
     const [deletingMulti, setDeletingMulti] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     const sortedPhotos = useMemo(() => sortPhotos(photos, sortOption), [photos, sortOption])
     const selectedPhotos = photos.filter(p => selectedIds.has(p.id))
@@ -84,8 +87,9 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
                 }
             } catch (err) {
                 console.error('Download err:', err)
-                alert('Failed to donwload some photos')
+                toast.error('Failed to download some photos')
             } finally {
+                toast.success(`Downloaded ${count} ${count === 1? 'photo' : 'photos'}`)
                 setDownloadingMulti(false)
                 setDownloadProgress({ current: 0, total: 0})
             }
@@ -102,9 +106,10 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
                     currentFolder,
                     (current, total) => setDownloadProgress({ current, total })
                 )
+                toast.success(`Downloaded ${count} photos as ZIP`)
             } catch (err) {
                 console.error('Download error:', err)
-                alert('Failed to download photos')
+                toast.error('Failed to download photos')
             } finally {
                 setDownloadingMulti(false)
                 setDownloadProgress({ current: 0, total: 0 })
@@ -114,7 +119,6 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
 
     const handleBulkDelete = async () => {
         const n = selectedIds.size
-        if (!confirm(`Detele ${n} ${n === 1 ? 'photo' : 'photos'}? This cannot be undone`)) return
         setDeletingMulti(true)
         try {
             await Promise.all(photos.filter(p => selectedIds.has(p.id)).map(p => deletePhoto(p.storage_path)))
@@ -124,13 +128,15 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
                 .in('id', [...selectedIds])
             
             if (error) throw error
+            toast.success(`Deleted ${n} ${n === 1 ? 'photo' : 'photos'}`)
 
             setSelectedIds(new Set())
             setSelectMode(false)
+            setShowDeleteConfirm(false)
             onRefresh()
         } catch (err) {
             console.error('Bulk delete error:', err)
-            alert('Failed to delete some photos')
+            toast.error('Failed to delete some photos')
         } finally {
             setDeletingMulti(false)
         }
@@ -321,8 +327,7 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
 
                             {selectedIds.size > 0 && (
                                 <button
-                                    onClick={handleBulkDelete}
-                                    disabled={deletingMulti}
+                                    onClick={() => setShowDeleteConfirm(true)}
                                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors disabled:opacity-50"
                                 >
                                     {deletingMulti ? (
@@ -442,6 +447,18 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
                     }}
                 />
             )}
+
+            <ConfirmModal
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={handleBulkDelete}
+                title="Delete Photos?"
+                message={`Are you sure you want to delete ${selectedIds.size}
+                    ${selectedIds.size === 1 ? 'photo' : 'photos'}? This action cannot be undone.`}
+                confirmText="Delete"
+                confirmStyle="danger"
+                loading={deletingMulti}
+            />
         </>
     )
 }
