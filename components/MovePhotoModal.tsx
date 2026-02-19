@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { FolderWithCount, PhotoWithUser } from "@/types/database"
+import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 
 interface MovePhotoModalProps {
@@ -41,11 +42,13 @@ export default function MovePhotoModal({
             if (error) throw error
             if (!data || data.length === 0) throw new Error('Permission denied - you can only move your own photos.')
 
+            const count = photos.length
+            toast.success(`Moved ${count} ${count === 1 ? 'photo' : 'photos'} successfully`)
             onMoved()
             onClose()
         } catch (err: any) {
             console.error('Move error:', err)
-            alert(err.message || 'Failed to move photos')
+            toast.error(err.message || 'Failed to move photos')
         } finally {
             setMoving(false)
         }

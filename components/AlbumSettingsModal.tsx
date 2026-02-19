@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { AlbumWithDetails } from "@/types/database"
+import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "./AuthProvider"
 import { createInviteCode } from "@/lib/albums"
@@ -85,10 +86,13 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
                 .eq('id', album.id)
             
             if (error) throw error
+
+            toast.success('Album settings saved')
             onUpdated()
             onClose()
         } catch (err: any) {
             setError(err.message || 'Failed to save changes')
+            toast.error('Failed to save changes')
         } finally {
             setSaving(false)
         }
@@ -106,6 +110,7 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
         if (!inviteCode) return
         await navigator.clipboard.writeText(inviteCode)
         setCodeCopied(true)
+        toast.success('Invite code copied to clipboard')
         setTimeout(() => setCodeCopied(false), 2000)
     }
 
@@ -121,9 +126,11 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
                 .eq('user_id', user.id)
 
             if (error) throw error
+            toast.success(`You left the album ${album.name}`)
             onLeft()
         } catch (err: any) {
             setError(err.message || 'Failed to leave album')
+            toast.error('Failed to leave album')
         } finally {
             setLeaving(false)
         }
@@ -156,9 +163,11 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
 
             if (error) throw error
 
+            toast.success('Album deleted successfully')
             onDeleted()
         } catch (err: any) {
             setError(err.message || 'Failed to delete album')
+            toast.error('Failed to delete album')
         } finally {
             setDeleting(false)
         }
