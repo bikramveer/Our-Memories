@@ -204,6 +204,7 @@ function AlbumCard({ album, onOpen, onRefresh }: {
     const { user } = useAuth()
 
     const memberNames = album.members.map((m: any) => m.name).filter(Boolean).join(', ')
+    const sharedCount = album.members.length - 1
 
     return (
         <>
@@ -274,10 +275,17 @@ function AlbumCard({ album, onOpen, onRefresh }: {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             {/* <span>Shared with {memberNames}</span> */}
-                            {memberNames.length >= 2 ? (
+                            {album.members.length === 1 ? (
                                 <span>Not shared with anyone yet</span>
                             ) : (
-                                <span>Shared with {memberNames}</span>
+                                <>
+                                    {album.members.length > 3 ? (
+                                        
+                                        <span>Shared with {sharedCount} others</span>
+                                    ) : (
+                                        <span>Shared with {memberNames}</span>   
+                                    )}
+                                </>
                             )}
                         </div>
 
