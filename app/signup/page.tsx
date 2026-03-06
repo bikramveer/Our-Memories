@@ -1,20 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
-
 import { Eye, EyeOff } from 'lucide-react';
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
 
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,12 +25,19 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
     try {
       // Sign up the user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             name, // This will be used by the trigger to populate profiles table
           },
@@ -37,8 +46,17 @@ export default function SignUpPage() {
 
       if (error) throw error
 
+      if (data.user) {
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          email,
+          name,
+        })
+      }
+
       // Redirect to home page (or show confirmation message)
-      router.push('/')
+      toast.success('Success! CHeck your email to verify your account.')
+      router.push('/login')
       router.refresh()
     } catch (err: any) {
       setError(err.message || 'Failed to sign up')
@@ -176,6 +194,52 @@ export default function SignUpPage() {
             <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
           </div>
 
+          <div>
+            <label htmlFor="confirmPassword"
+                className="
+                    block
+                    text-sm
+                    font-medium
+                    text-gray-700
+                    mb-2
+                    "
+            >
+                Confirm Password
+            </label>
+            <div className="relative">
+                <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="********"
+                    required
+                    className="auth-input"
+                />
+                <button
+                  type='button'
+                  className='
+                    absolute
+                    -translate-y-2/4
+                    cursor-pointer
+                    text-gray-400
+                    p-1.5
+                    rounded-[10px]
+                    border-[none]
+                    right-2.5
+                    top-2/4
+                    hover:text-gray-500
+                    background-transparent
+                    hover:background-#f3f4f6  
+                  '
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label='Toggle password visibility'
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+            </div>
+          </div>
+
           {/* Sign Up Button */}
           <button
             type="submit"
@@ -250,5 +314,17 @@ export default function SignUpPage() {
         }
       `}</style>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='animate-spin h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full' />
+      </div>
+    }>
+      <SignUpForm />
+    </Suspense>
   )
 }

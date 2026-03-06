@@ -1,21 +1,30 @@
 'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import FloatingInfo from '../../components/FloatingInfo'
 import Link from "next/link";
 import Logo from "@/components/Logo";
 
 import { Eye, EyeOff } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams()
     const [email, setEmail] = useState('');
 
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (searchParams.get('verified') === 'true') {
+        toast.success('Email verified! You can now log in.')
+        }
+    }, [searchParams])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,6 +38,11 @@ export default function LoginPage() {
             });
 
             if (error) throw error;
+
+            if (data.user && !data.user.email_confirmed_at) {
+                await supabase.auth.signOut()
+                throw new Error('Please verify your email before logging in. Check your inbox!')
+            }
             
             router.push('/');
             router.refresh()
@@ -304,6 +318,19 @@ export default function LoginPage() {
                     animation: float 2s ease-in-out infinite;
                 }
             `}</style>
+            <FloatingInfo />
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className='min-h-screen flex items-center justify-center bg-blue-50'>
+                <div className='animate-spin h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full' />
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }
