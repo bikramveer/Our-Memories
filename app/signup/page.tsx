@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
@@ -8,7 +8,7 @@ import Link from 'next/link'
 import Logo from '@/components/Logo'
 import { Eye, EyeOff } from 'lucide-react';
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -314,5 +314,17 @@ export default function SignUpPage() {
         }
       `}</style>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='animate-spin h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full' />
+      </div>
+    }>
+      <SignUpForm />
+    </Suspense>
   )
 }
