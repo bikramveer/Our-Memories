@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import FloatingInfo from '../../components/FloatingInfo'
 import Link from "next/link";
 import Logo from "@/components/Logo";
@@ -11,12 +12,19 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams()
     const [email, setEmail] = useState('');
 
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (searchParams.get('verified') === 'true') {
+        toast.success('Email verified! You can now log in.')
+        }
+    }, [searchParams])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

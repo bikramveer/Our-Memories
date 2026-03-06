@@ -1,37 +1,35 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import Logo from '@/components/Logo'
-
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function SignUpPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
 
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false);
-  const [confirmPassord, setConfirmPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (searchParams.get('verified') === 'true') {
-      toast.success('Email verified! You can now log in.')
-    }
-  }, [searchParams])
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
 
     try {
       // Sign up the user
@@ -212,7 +210,7 @@ export default function SignUpPage() {
                 <input
                     id="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassord}
+                    value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="********"
                     required
@@ -237,7 +235,7 @@ export default function SignUpPage() {
                   onClick={() => setShowConfirmPassword((v) => !v)}
                   aria-label='Toggle password visibility'
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
             </div>
           </div>
