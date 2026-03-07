@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { joinAlbumWithCode } from "@/lib/albums"
 import { useAuth } from "./AuthProvider"
-import { blockDemoAction } from "@/lib/demoUser"
+import { checkDemoUser } from "@/lib/demoUser";
+import { useDemoModal } from "./DemoModalProvider";
 
 interface Props {
     isOpen: boolean
@@ -13,13 +14,15 @@ interface Props {
 
 export default function JoinAlbumModal({ isOpen, onClose, onJoined }: Props) {
     const { user } = useAuth()
+    const { showDemoModal } = useDemoModal()
     const [code, setCode] = useState('')
     const [joining, setJoining] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     const handleJoin = async(e: React.FormEvent) => {
         e.preventDefault()
-        if (blockDemoAction(user?.email, 'join albums')) {
+        if (checkDemoUser(user?.email)) {
+            showDemoModal('join albums')
             return
         }
         if (!code.trim() || !user) return
