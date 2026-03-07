@@ -65,7 +65,6 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
     }
 
     const handleButtonClick = () => {
-        const { user } = useAuth()
 
         if (blockDemoAction(user?.email, 'upload photos')) {
             return
