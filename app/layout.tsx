@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
+import { DemoModalProvider } from "@/components/DemoModalProvider";
 import ToastProvider from "@/components/ToastProvider";
 
 export const metadata: Metadata = {
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          {children}
-          <ToastProvider />
+          <DemoModalProvider>
+            {children}
+            <ToastProvider />
+          </DemoModalProvider>
         </AuthProvider>
       </body>
     </html>

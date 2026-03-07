@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
-import { blockDemoAction } from '@/lib/demoUser'
+import { checkDemoUser } from "@/lib/demoUser";
+import { useDemoModal } from "./DemoModalProvider";
 
 interface Props {
   isOpen: boolean
@@ -22,6 +23,7 @@ const THEME_COLORS = [
 
 export default function CreateAlbumModal({ isOpen, onClose, onCreated }: Props) {
   const { user }                    = useAuth()
+  const { showDemoModal }           = useDemoModal()
   const [name, setName]             = useState('')
   const [themeColor, setThemeColor] = useState(THEME_COLORS[0].value)
   const [creating, setCreating]     = useState(false)
@@ -29,7 +31,8 @@ export default function CreateAlbumModal({ isOpen, onClose, onCreated }: Props) 
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (blockDemoAction(user?.email, 'create albums')) {
+    if (checkDemoUser(user?.email)) {
+      showDemoModal('create albums')
       return
     }
     if (!name.trim() || !user) return

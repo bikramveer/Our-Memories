@@ -4,11 +4,14 @@ export function isDemoUser(email: string | undefined): boolean {
     return email === DEMO_EMAIL
 }
 
+export function checkDemoUser(email: string | undefined): boolean {
+    return isDemoUser(email)
+}
+
 export function blockDemoAction(email: string | undefined, actionName: string): boolean {
     if (isDemoUser(email)) {
         alert(`Demo accounts cannot ${actionName}. Sign up for a free account to try all features!`)
-        return true         // action is blocked
+        return true
     }
-    
-    return false            // action is allowed
+    return false
 }

@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { CommentWithUser } from '@/types/database'
 import { useAuth } from './AuthProvider'
-import { blockDemoAction } from '@/lib/demoUser'
+import { checkDemoUser } from "@/lib/demoUser";
+import { useDemoModal } from "./DemoModalProvider";
 import { supabase } from '@/lib/supabase'
 import Comment from './Comment';
 
@@ -16,12 +17,14 @@ interface CommentSectionProps {
 
 export default function CommentSection({ photoId, comments, loading, onCommentAdded }: CommentSectionProps) {
   const { user } = useAuth()
+  const { showDemoModal } = useDemoModal()
   const [newComment, setNewComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (blockDemoAction(user?.email, 'comment on photos')) {
+    if (checkDemoUser(user?.email)) {
+      showDemoModal('post comments')
       return
     }
     if (!newComment.trim() || !user) return

@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { useAuth } from './AuthProvider';
-import { blockDemoAction } from '@/lib/demoUser';
+import { checkDemoUser } from "@/lib/demoUser";
+import { useDemoModal } from "./DemoModalProvider";
 import { uploadPhoto, validateImageFile, getPhotoMetadata } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 
@@ -14,6 +15,7 @@ interface PhotoUploadProps {
 
 export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId }: PhotoUploadProps) {
     const { user } = useAuth();
+    const { showDemoModal } = useDemoModal()
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,8 +67,8 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
     }
 
     const handleButtonClick = () => {
-
-        if (blockDemoAction(user?.email, 'upload photos')) {
+        if (checkDemoUser(user?.email)) {
+            showDemoModal('upload photos')
             return
         }
         fileInputRef.current?.click();

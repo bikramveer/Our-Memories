@@ -297,47 +297,59 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
                                 Share this code with someone to invite them to <strong>{album.name}</strong>. Codes expire after 7 days.
                             </p>
 
-                            {inviteCode ? (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 bg-gray-50 border-2 border-gray-200 rounded-xl py-3 px-4 text-center font-mono text-2xl font-bold tracking-widest text-gray-800">
-                                            {inviteCode}
-                                        </div>
-                                        <button
-                                            onClick={handleCopyCode}
-                                            className={`p-3 rounded-xl transition-colors
-                                                    ${codeCopied ? 'bg-green-100 text-gray-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}
-                                                `}
-                                        >
-                                            {codeCopied ? (
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d='M5 13l4 4L19 7' />
-                                                </svg>
-                                            ) : (
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                </svg>
-                                            )}
-                                        </button>
-                                    </div>
-
-                                    <button
-                                        onClick={handleGenerateCode}
-                                        disabled={generatingCode}
-                                        className="w-full py-2.5 rounded-full border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-blue-400 hover:text-blue-500 transition-colors"
-                                    >
-                                        {generatingCode ? 'Generating...' : 'Generate New Code'}
-                                    </button>
-                                </div>
-                            ) : (
+                            {user?.email === 'test@test.com' ? (
                                 <button
-                                    onClick={handleGenerateCode}
-                                    disabled={generatingCode}
-                                    className="auth-button w-full"
+                                    disabled
+                                    className="w-full py-2.5 rounded-full border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-blue-400 hover:text-blue-500 transition-colors"
                                 >
-                                    {generatingCode ? 'Generating...' : 'Generate Invite Code'}
+                                    Demo users cannot generate invite codes.
                                 </button>
+                            ) : (
+                                <div>
+                                    {inviteCode ? (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 bg-gray-50 border-2 border-gray-200 rounded-xl py-3 px-4 text-center font-mono text-2xl font-bold tracking-widest text-gray-800">
+                                                    {inviteCode}
+                                                </div>
+                                                <button
+                                                    onClick={handleCopyCode}
+                                                    className={`p-3 rounded-xl transition-colors
+                                                            ${codeCopied ? 'bg-green-100 text-gray-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}
+                                                        `}
+                                                >
+                                                    {codeCopied ? (
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d='M5 13l4 4L19 7' />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            </div>
+
+                                            <button
+                                                onClick={handleGenerateCode}
+                                                disabled={generatingCode}
+                                                className="w-full py-2.5 rounded-full border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-blue-400 hover:text-blue-500 transition-colors"
+                                            >
+                                                {generatingCode ? 'Generating...' : 'Generate New Code'}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={handleGenerateCode}
+                                            disabled={generatingCode}
+                                            className="auth-button w-full"
+                                        >
+                                            {generatingCode ? 'Generating...' : 'Generate Invite Code'}
+                                        </button>
+                                    )}
+                                </div>
                             )}
+
                         </div>
                     )}
 
@@ -387,13 +399,22 @@ export default function AlbumSettingsModal({ album, isOpen, onClose, onUpdated, 
                                             You can rejoin later with an invite code.
                                         </p>
                                     </div>
-                                    <button
-                                        onClick={handleLeave}
-                                        disabled={leaving}
-                                        className="w-full py-3 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors disabled:opacity-50"
-                                    >
-                                        {leaving ? 'Leaving...' : `Leave "${album.name}"`}
-                                    </button>
+                                    {user?.email === 'test@test.com' ? (
+                                        <button
+                                            disabled
+                                            className="w-full py-2.5 rounded-full border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-blue-400 hover:text-blue-500 transition-colors"
+                                        >
+                                            Demo users cannot leave the demo albums.
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={handleLeave}
+                                            disabled={leaving}
+                                            className="w-full py-3 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors disabled:opacity-50"
+                                        >
+                                            {leaving ? 'Leaving...' : `Leave "${album.name}"`}
+                                        </button>
+                                    )}
                                 </>
                             ) : (
                                 <>

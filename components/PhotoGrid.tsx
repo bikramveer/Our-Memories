@@ -4,6 +4,9 @@ import { useState, useMemo } from "react";
 import { PhotoWithUser, FolderWithCount } from "@/types/database";
 import { deletePhoto, getPhotoUrl } from "@/lib/storage";
 import { downloadPhotosAsZip, downloadSinglePhoto } from "@/lib/downloadHelpers";
+import { useAuth } from "./AuthProvider";
+import { checkDemoUser } from "@/lib/demoUser";
+import { useDemoModal } from "./DemoModalProvider";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Images } from "lucide-react";
@@ -45,6 +48,8 @@ function sortPhotos(photos: PhotoWithUser[], sort: SortOption): PhotoWithUser[] 
 };
 
 export default function PhotoGrid({ photos, folders, albumName, currentFolder, loading, onRefresh, emptyMessage, sortOption, onSortChange }: PhotoGridProps) {
+    const { user } = useAuth()
+    const { showDemoModal } = useDemoModal()
     const [selectedPhoto, setSelectedPhoto] = useState<PhotoWithUser | null>(null)
     const [selectMode, setSelectMode] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -119,6 +124,7 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
     }
 
     const handleBulkDelete = async () => {
+        
         const n = selectedIds.size
         setDeletingMulti(true)
         try {
@@ -329,7 +335,14 @@ export default function PhotoGrid({ photos, folders, albumName, currentFolder, l
 
                             {selectedIds.size > 0 && (
                                 <button
-                                    onClick={() => setShowDeleteConfirm(true)}
+                                    onClick={() => {
+                                        if (checkDemoUser(user?.email)) {
+                                            showDemoModal('delete photos')
+                                            return
+                                        } else {
+                                            setShowDeleteConfirm(true)
+                                        }
+                                    }}
                                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors disabled:opacity-50"
                                 >
                                     {deletingMulti ? (

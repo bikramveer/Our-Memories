@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "./AuthProvider"
-import { blockDemoAction } from "@/lib/demoUser"
+import { checkDemoUser } from "@/lib/demoUser";
+import { useDemoModal } from "./DemoModalProvider";
 
 interface CreateFolderModalProps {
     isOpen: boolean
@@ -23,6 +24,7 @@ const FOLDER_COLORS = [
 
 export default function CreateFolderModal({ isOpen, onClose, onFolderCreated, albumId }: CreateFolderModalProps) {
     const { user } = useAuth()
+    const { showDemoModal } = useDemoModal()
     const [name, setName] = useState('')
     const [selectedColor, setSelectedColor] = useState(FOLDER_COLORS[0].value)
     const [creating, setCreating] = useState(false)
@@ -30,7 +32,8 @@ export default function CreateFolderModal({ isOpen, onClose, onFolderCreated, al
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (blockDemoAction(user?.email, 'create folders')) {
+        if (checkDemoUser(user?.email)) {
+            showDemoModal('create folders')
             return
         }
         if (!name.trim() || !user) return
