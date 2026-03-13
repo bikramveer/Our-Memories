@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter, useParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { Profile, PhotoWithUser, FolderWithCount, AlbumWithDetails} from '@/types/database'
 import type { SortOption } from "@/components/PhotoGrid"
@@ -17,6 +17,7 @@ import Logo from "@/components/Logo"
 export default function AlbumPage() {
     const { user, loading, signOut } = useAuth()
     const router = useRouter()
+    const hasFetched = useRef(false)
     const params = useParams()
     const albumId = params.id as string
 
@@ -34,7 +35,10 @@ export default function AlbumPage() {
             router.push('/login')
             return
         }
-        if (user && albumId) { fetchAll() }
+        if (user && albumId && !hasFetched.current) { 
+          fetchAll()
+          hasFetched.current = true 
+        }
     }, [user, loading, albumId])
 
     const fetchAll = async () => {
