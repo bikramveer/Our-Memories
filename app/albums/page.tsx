@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { fetchUserAlbums } from "@/lib/albums"
 import { AlbumWithDetails } from "@/types/database"
 import { getPhotoUrl } from "@/lib/storage"
@@ -16,6 +16,7 @@ import Logo from "@/components/Logo"
 export default function AlbumsPage() {
     const { user, loading, signOut } = useAuth()
     const router = useRouter()
+    const hasFetched = useRef(false)
     const [albums, setAlbums] = useState<AlbumWithDetails[]>([])
     const [loadingAlbums, setLoadingAlbums] = useState(true)
     const [albumSelected, setAlbumSelected] = useState(false)
@@ -28,7 +29,10 @@ export default function AlbumsPage() {
             router.push('/login');
             return;
         }
-        if (user) { loadData() }
+        if (user && !hasFetched.current) { 
+            hasFetched.current = true    
+            loadData()
+        }
     }, [user, loading])
 
     const loadData = async () => {
