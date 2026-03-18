@@ -70,24 +70,24 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
 
     const handleButtonClick = () => {
         if (checkDemoUser(user?.email)) {
-            showDemoModal('upload photos')
-            return
+            showDemoModal('upload photos');
+            return;
         }
         fileInputRef.current?.click();
     }
 
     const handleFileSelect = async(e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files
-        if (!files || files.length === 0 || !user) return
+        const files = e.target.files;
+        if (!files || files.length === 0 || !user) return;
 
-        setUploading(true)
-        setError(null)
+        setUploading(true);
+        setError(null);
 
         try {
-            const processedFiles: File[] = []
+            const processedFiles: File[] = [];
 
             for (const file of Array.from(files)) {
-                const isHeic = file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')
+                const isHeic = file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic');
 
                 if (isHeic) {
                     try {
@@ -95,36 +95,36 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
                             blob: file,
                             toType: 'image/jpeg',
                             quality: 0.9,
-                        })
+                        });
 
-                        const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob
+                        const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
 
                         const convertedFile = new File(
                             [blob],
                             file.name.replace(/\.heic$/i, '.jpg'),
                             { type: 'image/jpeg' }
-                        )
+                        );
 
-                        processedFiles.push(convertedFile)
+                        processedFiles.push(convertedFile);
                     } catch (conversionError) {
-                        console.error('HEIC conversion failed:', conversionError)
-                        setError(`Failed to convert ${file.name}. Please try converting to JPEG first.`)
-                        continue
+                        console.error('HEIC conversion failed:', conversionError);
+                        setError(`Failed to convert ${file.name}. Please try converting to JPEG first.`);
+                        continue;
                     }
                 } else {
-                    processedFiles.push(file)
+                    processedFiles.push(file);
                 }
             }
 
             for (const file of processedFiles) {
-                const validation = validateImageFile(file)
+                const validation = validateImageFile(file);
                 if (!validation.valid) {
-                    setError(validation.error || 'Invalid file')
-                    continue
+                    setError(validation.error || 'Invalid file');
+                    continue;
                 }
 
-                const storagePath = await uploadPhoto(file, user.id)
-                const metadata = getPhotoMetadata(file)
+                const storagePath = await uploadPhoto(file, user.id);
+                const metadata = getPhotoMetadata(file);
 
                 const { error: dbError } = await supabase
                     .from('photos')
@@ -134,19 +134,19 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
                         storage_path: storagePath,
                         folder_id: currentFolderId,
                         ...metadata,
-                    })
+                    });
 
-                if (dbError) throw dbError
+                if (dbError) throw dbError;
             }
 
-            onUploadComplete()
+            onUploadComplete();
 
             if (fileInputRef.current) {
-                fileInputRef.current.value = ''
+                fileInputRef.current.value = '';
             }
         } catch (err: any) {
-            console.error('Upload error:', err)
-            setError(err.message || 'Failed to upload photo')
+            console.error('Upload error:', err);
+            setError(err.message || 'Failed to upload photo');
         } finally {
             setUploading(false);
         }
