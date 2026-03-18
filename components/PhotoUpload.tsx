@@ -5,7 +5,7 @@ import { useAuth } from './AuthProvider';
 import { checkDemoUser } from "@/lib/demoUser";
 import { useDemoModal } from "./DemoModalProvider";
 import { uploadPhoto, validateImageFile, getPhotoMetadata } from '@/lib/storage';
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { supabase } from '@/lib/supabase';
 import heic2any from 'heic2any';
 
