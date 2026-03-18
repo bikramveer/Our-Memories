@@ -85,6 +85,7 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
                     image/png,
                     image/gif,
                     image/webp,
+                    image/heic,
                     '
                 multiple
                 onChange={handleFileSelect}
