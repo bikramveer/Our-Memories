@@ -5,7 +5,9 @@ import { useAuth } from './AuthProvider';
 import { checkDemoUser } from "@/lib/demoUser";
 import { useDemoModal } from "./DemoModalProvider";
 import { uploadPhoto, validateImageFile, getPhotoMetadata } from '@/lib/storage';
+import { toast } from "sonner";
 import { supabase } from '@/lib/supabase';
+import heic2any from 'heic2any';
 
 interface PhotoUploadProps {
     onUploadComplete: () => void
@@ -20,23 +22,109 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files || files.length === 0 || !user) return;
+    // const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const files = e.target.files;
+    //     if (!files || files.length === 0 || !user) return;
 
-        setUploading(true);
-        setError(null);
+    //     setUploading(true);
+    //     setError(null);
+
+    //     try {
+    //         for (const file of Array.from(files)) {
+    //             const validation = validateImageFile(file);
+    //             if (!validation.valid) {
+    //                 setError(validation.error || 'Invalid file');
+    //                 continue;
+    //             }
+
+    //             const storagePath = await uploadPhoto(file, user.id);
+    //             const metadata = getPhotoMetadata(file);
+
+    //             const { error: dbError } = await supabase
+    //                 .from('photos')
+    //                 .insert({
+    //                     user_id: user.id,
+    //                     album_id: albumId,
+    //                     storage_path: storagePath,
+    //                     folder_id: currentFolderId,
+    //                     ...metadata,
+    //                 })
+                
+    //             if (dbError) throw dbError;
+    //         }
+
+    //         // Refresh photo grid
+    //         onUploadComplete();
+
+    //         // Refresh input
+    //         if (fileInputRef.current) {
+    //             fileInputRef.current.value = '';
+    //         }
+    //     } catch (err: any) {
+    //         console.error('Upload error:', err);
+    //         setError(err.message || 'Failed to upload photo');
+    //     } finally {
+    //         setUploading(false);
+    //     }
+    // }
+
+    const handleButtonClick = () => {
+        if (checkDemoUser(user?.email)) {
+            showDemoModal('upload photos')
+            return
+        }
+        fileInputRef.current?.click();
+    }
+
+    const handleFileSelect = async(e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (!files || files.length === 0 || !user) return
+
+        setUploading(true)
+        setError(null)
 
         try {
+            const processedFiles: File[] = []
+
             for (const file of Array.from(files)) {
-                const validation = validateImageFile(file);
+                const isHeic = file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')
+
+                if (isHeic) {
+                    try {
+                        const convertedBlob = await heic2any({
+                            blob: file,
+                            toType: 'image/jpeg',
+                            quality: 0.9,
+                        })
+
+                        const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob
+
+                        const convertedFile = new File(
+                            [blob],
+                            file.name.replace(/\.heic$/i, '.jpg'),
+                            { type: 'image/jpeg' }
+                        )
+
+                        processedFiles.push(convertedFile)
+                    } catch (conversionError) {
+                        console.error('HEIC conversion failed:', conversionError)
+                        setError(`Failed to convert ${file.name}. Please try converting to JPEG first.`)
+                        continue
+                    }
+                } else {
+                    processedFiles.push(file)
+                }
+            }
+
+            for (const file of processedFiles) {
+                const validation = validateImageFile(file)
                 if (!validation.valid) {
-                    setError(validation.error || 'Invalid file');
-                    continue;
+                    setError(validation.error || 'Invalid file')
+                    continue
                 }
 
-                const storagePath = await uploadPhoto(file, user.id);
-                const metadata = getPhotoMetadata(file);
+                const storagePath = await uploadPhoto(file, user.id)
+                const metadata = getPhotoMetadata(file)
 
                 const { error: dbError } = await supabase
                     .from('photos')
@@ -47,31 +135,21 @@ export default function PhotoUpload({ onUploadComplete, currentFolderId, albumId
                         folder_id: currentFolderId,
                         ...metadata,
                     })
-                
-                if (dbError) throw dbError;
+
+                if (dbError) throw dbError
             }
 
-            // Refresh photo grid
-            onUploadComplete();
+            onUploadComplete()
 
-            // Refresh input
             if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+                fileInputRef.current.value = ''
             }
         } catch (err: any) {
-            console.error('Upload error:', err);
-            setError(err.message || 'Failed to upload photo');
+            console.error('Upload error:', err)
+            setError(err.message || 'Failed to upload photo')
         } finally {
             setUploading(false);
         }
-    }
-
-    const handleButtonClick = () => {
-        if (checkDemoUser(user?.email)) {
-            showDemoModal('upload photos')
-            return
-        }
-        fileInputRef.current?.click();
     }
 
     return (
