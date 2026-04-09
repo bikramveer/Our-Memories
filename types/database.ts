@@ -10,6 +10,7 @@ export interface Profile {
     email: string
     name: string | null
     avatar_url: string | null
+    profile_picture: string | null
     created_at: string              // ISO date string
     updated_at: string              // ISO date string
 }
