@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { fetchUserAlbums } from "@/lib/albums"
 import { AlbumWithDetails } from "@/types/database"
+import { User, LogOut } from "lucide-react"
 import { getPhotoUrl } from "@/lib/storage"
 import { supabase } from "@/lib/supabase"
 
@@ -12,6 +13,7 @@ import CreateAlbumModal from "@/components/CreateAlbumModal"
 import JoinAlbumModal from "@/components/JoinAlbumModal"
 import AlbumSettingsModal from "@/components/AlbumSettingsModal"
 import Logo from "@/components/Logo"
+import Link from "next/link"
 
 export default function AlbumsPage() {
     const { user, loading, signOut } = useAuth()
@@ -78,15 +80,26 @@ export default function AlbumsPage() {
                         </div>  
                     </div>
 
-                    <button
-                        onClick={signOut}
-                        className="p-2 text-gray-500 hover:text-blue-500 transition-colors"
-                        title='Sign out'
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    </button>
+                    <div className="flex">
+                        <button
+                                onClick={() => router.push('/profile')}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl hover:text-teal-500 transition-all"
+                                title="Profile Settings"
+                            >
+                                <User size={24} />
+                                {/* <span className="hidden sm:inline font-medium text-gray-700">Profile</span> */}
+                            </button>
+
+                        <button
+                            onClick={signOut}
+                            className="p-2 text-gray-500 hover:text-blue-500 transition-colors"
+                            title='Sign out'
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </header>
 

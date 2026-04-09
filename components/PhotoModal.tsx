@@ -23,6 +23,9 @@ interface PhotoModalProps {
 
 export default function PhotoModal({ photo, folders, albumName, isOpen, onClose, onPhotoDeleted, onPhotoMoved}: PhotoModalProps) {
   const { user } = useAuth()
+  const [, setName] = useState('')
+  const [profilePicture, setProfilePicture] = useState<string | null>(null)
+  const [, setLoading] = useState(true)
   const [comments, setComments] = useState<CommentWithUser[]>([])
   const [loadingComments, setLoadingComments] = useState(true)
   const [showMoveModal, setShowMoveModal] = useState(false)
@@ -46,9 +49,29 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
   // Fetch comments when modal opens
   useEffect(() => {
     if (isOpen && photo) {
+      fetchProfile()
       fetchComments()
     }
   }, [isOpen, photo])
+
+  const fetchProfile = async () => {
+      try {
+          const { data, error } = await supabase
+              .from('profiles')
+              .select('name, profile_picture')
+              .eq('id', user?.id)
+              .single()
+
+          if (error) throw error
+          
+          setName(data.name || '')
+          setProfilePicture(data.profile_picture || null)
+      } catch (error) {
+          console.error('Error fetching profile:', error)
+      } finally {
+          setLoading(false)
+      }
+    }
 
   const fetchComments = async () => {
     setLoadingComments(true)
@@ -190,7 +213,14 @@ export default function PhotoModal({ photo, folders, albumName, isOpen, onClose,
               <div className='flex items-center justify-between mb-4'>
                 <div className='flex items-center gap-3'>
                   <div className='w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center text-white font-semibold'>
-                    {photo.profile?.name?.[0]?.toUpperCase() || '?'}
+                    
+                    {profilePicture ? (
+                      <img src={profilePicture} alt="Profile" style={{ objectFit: 'cover', borderRadius: 999 }}/>
+                    ) : (
+                      <>
+                        {photo.profile?.name?.[0]?.toUpperCase() || '?'}
+                      </>
+                    )}
                   </div>
                   <div>
                     <p className='font-semibold text-gray-800'>
