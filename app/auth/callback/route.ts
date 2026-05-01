@@ -35,12 +35,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-    console.log('Auth callback hit:', request.url)
     const requestUrl = new URL(request.url)
     const token_hash = requestUrl.searchParams.get('token_hash')
     const type = requestUrl.searchParams.get('type')
     const code = requestUrl.searchParams.get('code')
-    console.log('Params:', { token_hash, type, code })
+
+    const origin = 'https://yalbum.app'
 
     const cookieStore = await cookies()
 
@@ -74,14 +74,14 @@ export async function GET(request: NextRequest) {
             type: type as any,
         })
         if (type === 'recovery') {
-          return NextResponse.redirect(new URL('/reset', requestUrl.origin))
+          return NextResponse.redirect(new URL('/reset', origin))
         }
     } else if (code) {
         // Fallback for OAuth or other flows that use code
         await supabase.auth.exchangeCodeForSession(code)
-        return NextResponse.redirect(new URL('/reset', requestUrl.origin))
+        return NextResponse.redirect(new URL('/reset', origin))
     }
 
     // Redirect to login page with success message
-    return NextResponse.redirect(new URL('/login?verified=true', requestUrl.origin))
+    return NextResponse.redirect(new URL('/login?verified=true', origin))
 }
