@@ -70,9 +70,13 @@ export async function GET(request: NextRequest) {
             token_hash,
             type: type as any,
         })
+        if (type === 'recovery') {
+          return NextResponse.redirect(new URL('/reset', requestUrl.origin))
+        }
     } else if (code) {
         // Fallback for OAuth or other flows that use code
         await supabase.auth.exchangeCodeForSession(code)
+        return NextResponse.redirect(new URL('/reset', requestUrl.origin))
     }
 
     // Redirect to login page with success message

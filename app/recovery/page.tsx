@@ -23,7 +23,7 @@ function ForgotPasswordForm() {
         setLoading(true)
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-                redirectTo: 'https://yalbum.app/reset'
+                redirectTo: 'https://yalbum.app/auth/callback'
             })
             if (error) throw error
             setSent(true)

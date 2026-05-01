@@ -17,26 +17,18 @@ function ResetPasswordForm() {
     const [sessionReady, setSessionReady] = useState(false)
 
     useEffect(() => {
-        // Check immediately on mount for existing session from URL hash
-        const handleHashChange = async () => {
-            const hash = window.location.hash
-            if (hash && hash.includes('type=recovery')) {
-                const { data } = await supabase.auth.getSession()
-                if (data.session) {
-                    setSessionReady(true)
-                }
-            }
-        }
-        handleHashChange()
-
-        // Listen for auth state changes as fallback
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            (event, session) => {
                 if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
                     setSessionReady(true)
                 }
             }
         )
+
+        // Also check for existing session immediately
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) setSessionReady(true)
+        })
 
         return () => subscription.unsubscribe()
     }, [])
