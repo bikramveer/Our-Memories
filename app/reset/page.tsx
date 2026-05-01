@@ -17,33 +17,18 @@ function ResetPasswordForm() {
     const [sessionReady, setSessionReady] = useState(false)
 
     useEffect(() => {
-        const exchangeCode = async () => {
-            const params = new URLSearchParams(window.location.search)
-            const code = params.get('code')
-
-            if (code) {
-                try {
-                    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-                    if (error) throw error
-                    if (data.session) {
-                        setSessionReady(true)
-                    }
-                } catch (error) {
-                    console.error('Failed to exchange code for session:', error)
-                }
-            }
-        }
-
-        exchangeCode()
-
-        // Keep as fallback for non-PKCE flows
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            (event, session) => {
                 if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
                     setSessionReady(true)
                 }
             }
         )
+
+        // Also check for existing session immediately
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) setSessionReady(true)
+        })
 
         return () => subscription.unsubscribe()
     }, [])
